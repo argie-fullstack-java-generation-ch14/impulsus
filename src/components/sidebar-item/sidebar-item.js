@@ -1,5 +1,5 @@
 const navItems = [
-  { icon: "ri-dashboard-horizontal-line", label: "Tablero", href: "impulsus/dashboard/" },
+  { icon: "ri-dashboard-horizontal-line", label: "Tablero", href: "./" },
   // { icon: "ri-settings-4-line", label: "Configuración", href: "impulsus/configuracion/" },
 ];
 
