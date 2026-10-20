@@ -35,17 +35,27 @@ A diferencia de las listas de tareas convencionales que generan abrumación, **I
 
 ## 🚀 Instalación y Uso Local
 
-No requiere dependencias ni gestores de paquetes. Para ejecutar el proyecto localmente:
+No requiere dependencias ni gestores de paquetes. El proyecto es 100% estático, pero necesita un servidor local porque los componentes se cargan con `fetch` (no funciona abriendo el HTML con `file://`).
 
 1. Clona este repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/impulsus.git
+   git clone https://github.com/argie-fullstack-java-generation-ch14/impulsus.git
    ```
 2. Navega al directorio del proyecto:
    ```bash
    cd impulsus
    ```
-3. Abre el archivo `index.html` en tu navegador preferido.
+3. Levanta un servidor local sirviendo la carpeta `src`:
+   ```bash
+   python3 -m http.server 8000 --directory src
+   ```
+   Alternativa sin Python: `npx serve src`
+4. Abre la vista del tablero en el navegador:
+   ```
+   http://localhost:8000/impulsus/dashboard/
+   ```
+
+> 💡 En la raíz (`http://localhost:8000/`) queda el prototipo original en Tailwind.
 
 ---
 
