@@ -133,7 +133,7 @@
 }
 
 @media (max-width: 768px) {
-  .app-shell {
+  .app-dashboard {
     overflow: auto;
   }
 
@@ -142,7 +142,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .main-container,
+  .dashboard-main-container,
   .content {
     height: auto;
     overflow: visible;
