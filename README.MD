@@ -47,13 +47,13 @@ No requiere dependencias ni gestores de paquetes. El proyecto es 100% estático,
    ```
 3. Abre el proyecto en VS Code con la extensión **Live Server**
    instalada, haz clic derecho sobre
-   `src/impulsus/dashboard/index.html` → **Open with Live Server**
+   `src/index.html` → **Open with Live Server**
 4. El tablero se abre en:
    ```
-   http://127.0.0.1:5500/src/impulsus/dashboard/index.html
+   http://127.0.0.1:5500/src/index.html
    ```
 
-> 💡 En la raíz (`http://127.0.0.1:5500/`) queda el prototipo original en Tailwind.
+> 💡 El prototipo original en Tailwind quedó guardado en `src/old-index.html`.
 
 ---
 
