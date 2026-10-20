@@ -45,17 +45,15 @@ No requiere dependencias ni gestores de paquetes. El proyecto es 100% estático,
    ```bash
    cd impulsus
    ```
-3. Levanta un servidor local sirviendo la carpeta `src`:
-   ```bash
-   python3 -m http.server 8000 --directory src
+3. Abre el proyecto en VS Code con la extensión **Live Server**
+   instalada, haz clic derecho sobre
+   `src/impulsus/dashboard/index.html` → **Open with Live Server**
+4. El tablero se abre en:
    ```
-   Alternativa sin Python: `npx serve src`
-4. Abre la vista del tablero en el navegador:
-   ```
-   http://localhost:8000/impulsus/dashboard/
+   http://127.0.0.1:5500/src/impulsus/dashboard/index.html
    ```
 
-> 💡 En la raíz (`http://localhost:8000/`) queda el prototipo original en Tailwind.
+> 💡 En la raíz (`http://127.0.0.1:5500/`) queda el prototipo original en Tailwind.
 
 ---
 
