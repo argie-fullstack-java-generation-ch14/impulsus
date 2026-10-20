@@ -1,0 +1,15 @@
+.avatar-sm,
+.avatar-lg {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+}
+
+.avatar-lg {
+  width: 40px;
+  height: 40px;
+}
