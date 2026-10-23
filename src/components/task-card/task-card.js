@@ -224,12 +224,26 @@ $(dueDateInput).datepicker({
 
 let activeAssigneeTaskId = null;
 let activeDueDateTaskId = null;
+let activeAssigneeAnchor = null;
+let activeDueDateAnchor = null;
 
 function positionPopup(popup, anchor) {
   const rect = anchor.getBoundingClientRect();
   popup.style.top = `${rect.bottom + window.scrollY + 6}px`;
   popup.style.left = `${rect.left + window.scrollX}px`;
 }
+
+function repositionActivePopups() {
+  if (!assigneePicker.hidden && activeAssigneeAnchor) {
+    positionPopup(assigneePicker, activeAssigneeAnchor);
+  }
+  if (!dueDateWrapper.hidden && activeDueDateAnchor) {
+    positionPopup(dueDateWrapper, activeDueDateAnchor);
+  }
+}
+
+window.addEventListener("scroll", repositionActivePopups, true);
+window.addEventListener("resize", repositionActivePopups);
 
 function closeAllPopups() {
   document.querySelectorAll(".options-tooltip").forEach((tooltip) => {
@@ -240,22 +254,26 @@ function closeAllPopups() {
 
   assigneePicker.hidden = true;
   activeAssigneeTaskId = null;
+  activeAssigneeAnchor = null;
 
   $(dueDateInput).datepicker("hide");
   dueDateWrapper.hidden = true;
   activeDueDateTaskId = null;
+  activeDueDateAnchor = null;
 }
 
 function openAssigneePicker(anchor, task) {
   positionPopup(assigneePicker, anchor);
   assigneePicker.hidden = false;
   activeAssigneeTaskId = task.id;
+  activeAssigneeAnchor = anchor;
 }
 
 function openDueDatepicker(anchor, task) {
   positionPopup(dueDateWrapper, anchor);
   dueDateWrapper.hidden = false;
   activeDueDateTaskId = task.id;
+  activeDueDateAnchor = anchor;
   clearDateBtn.hidden = !task.dueDate;
   $(dueDateInput).val(task.dueDate || "").datepicker("update");
   $(dueDateInput).datepicker("show");
