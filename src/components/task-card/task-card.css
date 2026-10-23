@@ -308,6 +308,8 @@
 }
 
 .due-date-picker .datepicker {
+  position: static;
+  min-width: 0;
   order: 2;
   z-index: 50 !important;
   margin-top: 4px;
