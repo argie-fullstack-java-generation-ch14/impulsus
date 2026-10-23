@@ -1,18 +1,19 @@
-body {
-  background-color: var(--bg-app);
-}
-
 .create-task-card {
-  max-width: 650px;
   padding: 24px 28px;
-  margin: 40px auto;
   background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   border: none;
+  box-shadow: none;
+}
+
+#taskFormModal .modal-dialog {
+  max-width: 650px;
 }
 
 .create-task-card__header-btn {
+  padding: 0;
+  background: none;
+  border: 0;
   color: #64748b;
   cursor: pointer;
   font-size: 1.1rem;
@@ -48,6 +49,10 @@ body {
 .task-status:focus {
   background-color: #eef2ff;
   color: var(--primary-blue-hover);
+}
+
+.create-task-card .dropdown-item {
+  font-size: 14px;
 }
 
 .create-task-form__description {
@@ -97,26 +102,86 @@ body {
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
-.input-asignee {
+.assignee-select__toggle {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background-color: var(--input-bg);
   border: 1px solid var(--input-border);
   border-radius: 8px;
+  color: var(--text-body);
+  font-size: 14px;
   transition: all 0.2s ease;
-
-  .form-control {
-    font-size: 14px;
-    color: var(--text-body);
-  }
 }
 
-.input-asignee:focus-within {
+.assignee-select__toggle:hover,
+.assignee-select__toggle:focus {
   background-color: #ffffff;
   border-color: var(--primary-blue);
   box-shadow: 0 0 0 3px var(--focus-ring);
+  color: var(--text-body);
 }
 
-.input-asignee .form-control:focus {
-  box-shadow: none;
+.assignee-select__toggle::after {
+  margin-left: auto;
+}
+
+.assignee-select__placeholder,
+.assignee-select__value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.assignee-select__placeholder {
+  color: #64748b;
+}
+
+.assignee-select__value span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assignee-select__value img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.assignee-select__menu {
+  min-width: 200px;
+  padding: 4px;
+}
+
+.assignee-select__menu .assignee-picker__item {
+  width: 100%;
+}
+
+.create-task-card .datepicker {
+  z-index: 1060 !important;
+  margin-top: 4px;
+  padding: 8px;
+  background-color: #fff;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+}
+
+.create-task-card .datepicker-dropdown::before,
+.create-task-card .datepicker-dropdown::after {
+  content: none;
+  display: none;
+}
+
+.create-task-card .datepicker-days,
+.create-task-card .datepicker-months,
+.create-task-card .datepicker-years,
+.create-task-card .datepicker-decades {
+  background-color: #fff;
 }
 
 .create-task-form__btn {
