@@ -100,10 +100,10 @@ function taskCardTemplate(card) {
         ${dueDateSlotHtml}
         ${statusChipTemplate({ status, label: statusLabels[status] })}
         ${tagsRowTemplate(tags)}
-        ${commentsCountTemplate(comments)}
-      </div>
-    </div>
-  `;
+        </div>
+        </div>
+        `;
+  // ${commentsCountTemplate(comments)}
 }
 
 function renderTaskCards() {
