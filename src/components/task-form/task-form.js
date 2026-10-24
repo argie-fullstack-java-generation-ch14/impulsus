@@ -96,10 +96,29 @@
       });
     });
 
+    // paso 1 - task 3
     const form = modalEl.querySelector("#createTaskForm");
     form?.addEventListener("submit", (event) => {
       event.preventDefault();
+
+      const title = modalEl.querySelector("#taskName")?.value.trim() || "";
+      const description = modalEl.querySelector("#taskDescription")?.value.trim() || "";
+      const status = modalEl.querySelector("#taskStatusToggle")?.dataset.status || defaultStatus;
+      const dueDate = modalEl.querySelector("#dueDate")?.value || null;
+
+      const assigneeIndex = Number(modalEl.querySelector("#assigneeToggle")?.dataset.userIndex);
+      const assignee = typeof users !== "undefined" && assigneeIndex >= 0 ? users[assigneeIndex] : null;
+
+      const newTask = new Task(null, title, description, assignee, dueDate, status);
+      taskManager.addTask(newTask);
+
+      bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+
+      console.log("Nueva tarea:", newTask.getTask());
+      console.log("Total tareas:", taskManager.getAllTasks().length);
     });
+
+
 
     buildAssigneeMenu();
 
@@ -110,9 +129,9 @@
       setAssignee(item.dataset.userIndex);
     });
 
-    const deadlineInput = modalEl.querySelector("#deadline");
-    if (window.jQuery && jQuery.fn.datepicker && deadlineInput) {
-      jQuery(deadlineInput).datepicker({
+    const dueDateInput = modalEl.querySelector("#dueDate");
+    if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
+      jQuery(dueDateInput).datepicker({
         format: "dd/mm/yyyy",
         language: "es",
         autoclose: true,
@@ -124,8 +143,8 @@
       form?.reset();
       setStatus(defaultStatus);
       setAssignee(-1);
-      if (window.jQuery && jQuery.fn.datepicker && deadlineInput) {
-        jQuery(deadlineInput).datepicker("hide");
+      if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
+        jQuery(dueDateInput).datepicker("hide");
       }
     });
 
