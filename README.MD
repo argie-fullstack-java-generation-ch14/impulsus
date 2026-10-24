@@ -1,17 +1,22 @@
 # 🚀 Impulsus
 
-> *"Minima decisiones, magna incrementa."*  
+> *"Minima decisiones, magna incrementa."*
 > *(Pequeñas decisiones, grandes avances).*
 
-**Impulsus** es un planificador de tareas minimalista desarrollado con JavaScript, HTML5 y CSS3. Inspirado en la filosofía del **Efecto Compuesto**, la aplicación está diseñada bajo la premisa de que las metas extraordinarias no se alcanzan de golpe, sino mediante la acumulación constante de pequeñas acciones y decisiones diarias.
+**Impulsus** es un planificador de tareas minimalista desarrollado con JavaScript, HTML5 y CSS3. Este proyecto está profundamente inspirado en la filosofía de uno de mis libros favoritos, **"El Efecto Compuesto" (*The Compound Effect*) de Darren Hardy**, diseñado bajo la premisa de que las metas extraordinarias no se alcanzan con cambios drásticos de la noche a la mañana, sino mediante la acumulación constante y silenciosa de pequeñas acciones diarias.
 
 ---
 
-## 💡 Filosofía del Proyecto
+## 💡 Filosofía del Proyecto y Premisa del Libro
 
-El nombre **Impulsus** proviene del latín (*empuje, estímulo, fuerza en movimiento*). 
+El nombre **Impulsus** proviene del latín (*empuje, estímulo, fuerza en movimiento*).Su propósito es visibilizar cada paso y tarea pequeña, permitiendo llevarla a la acción de forma inmediata y sin distracciones, mantener el control del progreso y transformar cada avance completado en un catalizador de inercia positiva..
 
-A diferencia de las listas de tareas convencionales que generan abrumación, **Impulsus** busca transformar cada tarea completada en un catalizador de inercia positiva. Cada pequeña casilla marcada es un paso que reduce la distancia entre tu estado actual y tus metas a largo plazo.
+Nuestra arquitectura conceptual y diseño adoptan los **cuatro pilares fundamentales** de la filosofía del *Efecto Compuesto*:
+
+1. **La fórmula fundamental del éxito:** Tus resultados a largo plazo son el producto directo de la ecuación: *Elecciones + Comportamiento + Hábitos + Tiempo = Resultados*. No son los golpes de suerte ni los eventos aislados los que definen tu camino, sino las micro-decisiones que tomas todos los días.
+2. **El interés compuesto aplicado a los hábitos:** Al igual que el dinero en una cuenta de ahorros, las acciones cotidianas generan un rendimiento exponencial con el tiempo. A corto plazo los cambios parecen imperceptibles (lo que hace que muchos abandonen), pero a largo plazo crean una curva de crecimiento masiva. Cada pequeña casilla que marcas en Impulsus es un interés acumulado a tu favor.
+3. **La superación de la gratificación instantánea:** El mayor obstáculo del progreso es la trampa cultural de buscar resultados mágicos inmediatos y subestimar el poder de los pequeños pasos diarios. Impulsus te ayuda a anclarte en el presente y valorar el proceso constante.
+4. **Responsabilidad radical:** Todo lo que logras o dejas de lograr es el acumulado de tus propias elecciones pasadas. Al entender que tú tienes el control absoluto de tus rutinas, recuperas el poder de rediseñar tu futuro paso a paso.
 
 ---
 
@@ -30,6 +35,67 @@ A diferencia de las listas de tareas convencionales que generan abrumación, **I
 - **HTML5:** Estructura semántica y accesible.
 - **CSS3:** Estilos personalizados, variables CSS, Flexbox/Grid y animaciones para la experiencia de usuario.
 - **JavaScript (ES6+):** Lógica de la aplicación, manipulación del DOM y gestión del almacenamiento local (`localStorage`).
+
+---
+
+## 🧩 Arquitectura Reactiva
+
+La board se mantiene sincronizada con los datos gracias a dos "observadores" con roles distintos.
+
+### TaskManager: `subscribe()` y `notify()` (patrón Observer)
+
+`src/js/taskManager.js` implementa el patrón **Observer** para que la UI reaccione a los cambios de datos sin que nadie la llame manualmente:
+
+- El constructor guarda los suscriptores en `this.listeners` (un `Set`).
+- Cada método que muta la lista (`addTask`, `deleteTask`, `updateTask`) termina llamando a `this.notify()`.
+- `subscribe(listener)`: registra una función que se ejecutará en cada cambio y devuelve otra función para cancelar la suscripción.
+- `notify()`: recorre `listeners` y ejecuta cada uno pasándole `this.taskList`.
+
+El flujo real de la app cuando creas una tarea desde el formulario:
+
+```text
+task-form (submit) → taskManager.addTask(newTask) → notify() → renderTaskCards() → board actualizada
+```
+
+`src/components/task-card/task-card.js` es quien se suscribe al final de su script:
+
+```js
+taskManager.subscribe(renderTaskCards);
+```
+
+Así, cualquier `addTask`/`deleteTask`/`updateTask` (de hoy o de un módulo futuro) repinta la board sola. Si nunca más quieres recibir notificaciones, guarda el retorno y llámalo:
+
+```js
+const unsubscribe = taskManager.subscribe(renderTaskCards);
+// ... más adelante
+unsubscribe();
+```
+
+### MutationObserver (API nativa del navegador)
+
+`MutationObserver` observa cambios en el **DOM** (elementos añadidos/quitados, atributos, texto). En este proyecto se usa como espera del bootstrapping: los componentes se inyectan con `fetch` (asíncrono), así que cuando `task-card.js` se ejecuta todavía **no existen** los `<div id="taskColumnPending">...` donde irían las cards.
+
+```js
+if (!renderTaskCards()) {
+  const observer = new MutationObserver(() => {
+    if (renderTaskCards()) observer.disconnect();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+```
+
+- `renderTaskCards()` devuelve `false` si los contenedores de las columnas aún no están; el primer intento falla y se activa el observer.
+- `{ childList: true, subtree: true }`: avísame si en cualquier punto del `body` entran/salen nodos.
+- Cada vez que `renderPartial` inyecta los partials, el callback reintenta; cuando el render finalmente pinta, `observer.disconnect()` lo apaga.
+
+### ¿Quién hace qué?
+
+| Observador | Observa | Vida útil | Rol |
+|---|---|---|---|
+| `MutationObserver` (navegador) | Cambios del DOM | Hasta el primer render exitoso | Esperar a que existan las columnas inyectadas con `fetch` |
+| `subscribe`/`notify` (TaskManager) | Cambios en `taskList` (datos JS) | Permanente | Repintar la board cada vez que cambian los datos |
+
+> ⚠️ Un `MutationObserver` no puede vigilar un array de JavaScript: solo ve el DOM. Por eso la reactividad de datos vive en el TaskManager.
 
 ---
 
