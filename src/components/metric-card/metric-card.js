@@ -1,8 +1,25 @@
-const metrics = [
-  { icon: "ri-line-chart-line", title: "To Do", value: 4 },
-  { icon: "ri-line-chart-line", title: "En Progreso", value: 2 },
-  { icon: "ri-line-chart-line", title: "Completado", value: 7 },
-];
+function getMetricsData() {
+  const pendingCount =
+    typeof taskManager !== "undefined"
+      ? taskManager.getTasksWithStatus("pending").length
+      : 0;
+
+  const inProgressCount =
+    typeof taskManager !== "undefined"
+      ? taskManager.getTasksWithStatus("in-progress").length
+      : 0;
+
+  const completedCount =
+    typeof taskManager !== "undefined"
+      ? taskManager.getTasksWithStatus("done").length
+      : 0;
+
+  return [
+    { icon: "fa-solid fa-chart-line", title: "To Do", value: pendingCount },
+    { icon: "fa-solid fa-chart-line", title: "En Progreso", value: inProgressCount },
+    { icon: "fa-solid fa-chart-line", title: "Completado", value: completedCount },
+  ];
+}
 
 function metricCardTemplate({ icon, title, value }) {
   return `
@@ -20,6 +37,7 @@ function renderMetricCards() {
   const mount = document.getElementById("metricCards");
   if (!mount) return false;
 
+  const metrics = getMetricsData();
   mount.innerHTML = metrics.map(metricCardTemplate).join("");
   return true;
 }
@@ -29,4 +47,8 @@ if (!renderMetricCards()) {
     if (renderMetricCards()) observer.disconnect();
   });
   observer.observe(document.body, { childList: true, subtree: true });
+}
+
+if (typeof taskManager !== "undefined") {
+  taskManager.subscribe(renderMetricCards);
 }
