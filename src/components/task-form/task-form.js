@@ -1,4 +1,5 @@
 (() => {
+  let editingTaskId = null;
   const defaultStatus = "pending";
   const assigneePlaceholderHtml = `
     <span class="assignee-select__placeholder">
@@ -70,12 +71,61 @@
     `;
   }
 
+  function openEditTaskModal(task) {
+    const modalEl = getModalEl();
+    if (!modalEl || !task) return;
+
+    editingTaskId = task.id;
+
+    const modalTitle = modalEl.querySelector("#taskFormModalLabel");
+    if (modalTitle) modalTitle.textContent = "Editar tarea";
+
+    const submitBtn = modalEl.querySelector("button[type='submit']");
+    if (submitBtn) submitBtn.textContent = "Guardar";
+
+    const nameInput = modalEl.querySelector("#taskName");
+    if (nameInput) nameInput.value = task.title || "";
+
+    const descInput = modalEl.querySelector("#taskDescription");
+    if (descInput) descInput.value = task.description || "";
+
+    setStatus(task.status || defaultStatus);
+
+    let userIndex = -1;
+    if (task.assignee && typeof team !== "undefined") {
+      userIndex = team.findIndex(
+        (u) => u.name === task.assignee.name || u.src === task.assignee.src
+      );
+    }
+    setAssignee(userIndex);
+
+    const dueDateInput = modalEl.querySelector("#dueDate");
+    if (dueDateInput) {
+      dueDateInput.value = task.dueDate || "";
+      if (window.jQuery && jQuery.fn.datepicker) {
+        jQuery(dueDateInput).datepicker("update", task.dueDate || "");
+      }
+    }
+
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
+
+  window.openEditTaskModal = openEditTaskModal;
+
   document.addEventListener("click", (event) => {
     const addBtn = event.target.closest(".add-task-btn, .add-task-header-btn");
     if (!addBtn) return;
 
     const modalEl = getModalEl();
     if (!modalEl) return;
+
+    editingTaskId = null;
+
+    const modalTitle = modalEl.querySelector("#taskFormModalLabel");
+    if (modalTitle) modalTitle.textContent = "Crear tarea";
+
+    const submitBtn = modalEl.querySelector("button[type='submit']");
+    if (submitBtn) submitBtn.textContent = "Crear";
 
     const column = addBtn.closest(".column-container");
     setStatus(column?.dataset.status || defaultStatus);
@@ -109,8 +159,30 @@
       const assigneeIndex = Number(modalEl.querySelector("#assigneeToggle")?.dataset.userIndex);
       const assignee = typeof team !== "undefined" && assigneeIndex >= 0 ? team[assigneeIndex] : null;
 
-      const newTask = new Task(null, title, description, assignee, dueDate, status);
-      taskManager.addTask(newTask);
+      if (editingTaskId) {
+        const existingTask = taskManager.getAllTasks().find((t) => String(t.id) === String(editingTaskId));
+        const updatedTask = new Task(
+          Number(editingTaskId) || editingTaskId,
+          title,
+          description,
+          assignee,
+          dueDate,
+          status
+        );
+        if (existingTask) {
+          updatedTask.tags = existingTask.tags || [];
+          updatedTask.comments = existingTask.comments || 0;
+        }
+        taskManager.updateTask(editingTaskId, updatedTask);
+
+        console.log("Tarea actualizada:", updatedTask.getTask ? updatedTask.getTask() : updatedTask);
+      } else {
+        const newTask = new Task(null, title, description, assignee, dueDate, status);
+        taskManager.addTask(newTask);
+
+        console.log("Nueva tarea:", newTask.getTask());
+        console.log("Total tareas:", taskManager.getAllTasks().length);
+      }
 
       bootstrap.Modal.getOrCreateInstance(modalEl).hide();
 
@@ -140,10 +212,19 @@
     }
 
     modalEl.addEventListener("hidden.bs.modal", () => {
+      editingTaskId = null;
+
+      const modalTitle = modalEl.querySelector("#taskFormModalLabel");
+      if (modalTitle) modalTitle.textContent = "Crear tarea";
+
+      const submitBtn = modalEl.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.textContent = "Crear";
+
       form?.reset();
       setStatus(defaultStatus);
       setAssignee(-1);
       if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
+        jQuery(dueDateInput).datepicker("update", "");
         jQuery(dueDateInput).datepicker("hide");
       }
     });
