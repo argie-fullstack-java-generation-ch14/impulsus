@@ -1,7 +1,7 @@
 const user = {
   name: "Argie Rincón",
-  src: "https://res.cloudinary.com/dvvwfb2tr/image/upload/v1792865803/generation/AVATAR_ARGIE_vtyuul.svg",
-  role: "UI Designer",
+  src: "https://res.cloudinary.com/dvvwfb2tr/image/upload/v1792867758/generation/AVATAR_ARGIE_2_wsclb7.svg",
+  role: "Software Developer",
 };
 
 const team = [
