@@ -1,25 +1,44 @@
+function tooltipButtonTemplate({ action, icon, label, danger = false }) {
+  const dangerClass = danger ? " tooltip-action--danger" : "";
+  return `
+    <button type="button" class="tooltip-action${dangerClass}" data-action="${action}">
+      <i class="${icon}"></i>
+      <span>${label}</span>
+    </button>
+  `;
+}
+
 function optionsTooltipTemplate(params = {}) {
   const tagsActionLabel =
     typeof params === "string"
       ? params
       : params.tagsActionLabel || "Agregar etiquetas";
 
+  const options = [
+    {
+      action: "edit",
+      icon: "fa-regular fa-pen-to-square",
+      label: "Editar",
+    },
+    // {
+    //   action: "tags",
+    //   icon: "fa-solid fa-tag",
+    //   label: tagsActionLabel,
+    // },
+    {
+      action: "delete",
+      icon: "fa-solid fa-trash",
+      label: "Eliminar",
+      danger: true,
+    },
+  ];
+
   return `
     <div class="options-tooltip" hidden>
-      <button type="button" class="tooltip-action" data-action="edit">
-        <i class="ri-edit-box-line"></i>
-        <span>Editar</span>
-      </button>
-      <button type="button" class="tooltip-action" data-action="tags">
-        <i class="ri-price-tag-line"></i>
-        <span>${tagsActionLabel}</span>
-      </button>
-      <button type="button" class="tooltip-action tooltip-action--danger" data-action="delete">
-        <i class="ri-delete-bin-line"></i>
-        <span>Eliminar</span>
-      </button>
+      ${options.map(tooltipButtonTemplate).join("")}
     </div>
   `;
 }
 
 const tooltipTemplate = optionsTooltipTemplate;
+const tooltipActionButtonTemplate = tooltipButtonTemplate;
