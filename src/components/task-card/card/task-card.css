@@ -50,68 +50,6 @@
   background-color: #f1f5f9;
 }
 
-.options-tooltip {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  z-index: 20;
-  min-width: 140px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.options-tooltip[hidden] {
-  display: none;
-}
-
-.tooltip-action {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-main);
-  cursor: pointer;
-  text-align: left;
-}
-
-.tooltip-action:hover {
-  background-color: #f1f5f9;
-}
-
-.tooltip-action i {
-  font-size: 15px;
-  color: var(--text-muted);
-}
-
-.tooltip-action--danger {
-  color: #dc2626;
-}
-
-.tooltip-action--danger i {
-  color: #dc2626;
-}
-
-.tooltip-action--danger:hover {
-  background-color: #fef2f2;
-  color: #b91c1c;
-}
-
-.tooltip-action--danger:hover i {
-  color: #b91c1c;
-}
-
 .card-desc {
   margin-bottom: 14px;
   font-size: 12px;

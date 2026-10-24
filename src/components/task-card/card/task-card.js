@@ -74,20 +74,7 @@ function taskCardTemplate(card) {
           <button type="button" class="options-btn" aria-label="Opciones" aria-haspopup="true" aria-expanded="false">
             <i class="ri-more-2-fill"></i>
           </button>
-          <div class="options-tooltip" hidden>
-            <button type="button" class="tooltip-action" data-action="edit">
-              <i class="ri-edit-box-line"></i>
-              <span>Editar</span>
-            </button>
-            <button type="button" class="tooltip-action" data-action="tags">
-              <i class="ri-price-tag-line"></i>
-              <span>${tagsActionLabel}</span>
-            </button>
-            <button type="button" class="tooltip-action tooltip-action--danger" data-action="delete">
-              <i class="ri-delete-bin-line"></i>
-              <span>Eliminar</span>
-            </button>
-          </div>
+          ${optionsTooltipTemplate({ tagsActionLabel })}
         </div>
       </div>
 
