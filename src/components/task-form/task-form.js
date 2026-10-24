@@ -27,7 +27,7 @@
     if (!toggle) return;
 
     const index = Number(userIndex);
-    const user = typeof users !== "undefined" ? users[index] : null;
+    const user = typeof team !== "undefined" ? team[index] : null;
 
     if (user) {
       toggle.innerHTML = `
@@ -46,7 +46,7 @@
   function buildAssigneeMenu() {
     const modalEl = getModalEl();
     const menu = modalEl?.querySelector("#assigneeMenu");
-    if (!menu || typeof users === "undefined") return;
+    if (!menu || typeof team === "undefined") return;
 
     menu.innerHTML = `
       <li>
@@ -56,7 +56,7 @@
         </button>
       </li>
       <li><div class="assignee-picker__divider" role="separator"></div></li>
-      ${users
+      ${team
         .map(
           (user, index) => `
         <li>
@@ -107,7 +107,7 @@
       const dueDate = modalEl.querySelector("#dueDate")?.value || null;
 
       const assigneeIndex = Number(modalEl.querySelector("#assigneeToggle")?.dataset.userIndex);
-      const assignee = typeof users !== "undefined" && assigneeIndex >= 0 ? users[assigneeIndex] : null;
+      const assignee = typeof team !== "undefined" && assigneeIndex >= 0 ? team[assigneeIndex] : null;
 
       const newTask = new Task(null, title, description, assignee, dueDate, status);
       taskManager.addTask(newTask);

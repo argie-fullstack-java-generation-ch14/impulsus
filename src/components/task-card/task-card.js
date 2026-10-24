@@ -1,18 +1,3 @@
-const users = [
-  {
-    name: "Argie Rincón",
-    src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "María Gómez",
-    src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "Carlos Pérez",
-    src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80",
-  },
-];
-
 const taskColumnIds = [
   "taskColumnPending",
   "taskColumnInProgress",
@@ -153,7 +138,7 @@ assigneePicker.innerHTML = `
     <span>Sin asignar</span>
   </button>
   <div class="assignee-picker__divider" role="separator"></div>
-  ${users
+  ${team
     .map(
       (user, index) => `
       <button type="button" class="assignee-picker__item" data-user-index="${index}">
@@ -305,7 +290,7 @@ document.addEventListener("click", (event) => {
     const task = findTask(activeAssigneeTaskId);
     if (task) {
       const userIndex = Number(pickerItem.dataset.userIndex);
-      task.assignee = userIndex >= 0 ? users[userIndex] || null : null;
+      task.assignee = userIndex >= 0 ? team[userIndex] || null : null;
       refreshTaskCard(task);
     }
     closeAllPopups();
