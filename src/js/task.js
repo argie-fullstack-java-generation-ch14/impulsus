@@ -1,21 +1,21 @@
 class Task {
 
-  constructor(id, name, description, assigned, deadline, status) {
+  constructor(id, title, description, assignee, dueDate, status) {
     this.id = id;
-    this.name = name;
+    this.title = title;
     this.description = description;
-    this.assigned = assigned;
-    this.deadline = deadline;
+    this.assignee = assignee;
+    this.dueDate = dueDate;
     this.status = status;
   }
 
   getTask() {
     return {
       id: this.id,
-      name: this.name,
+      title: this.title,
       description: this.description,
-      assigned: this.assigned,
-      deadline: this.deadline,
+      assignee: this.assignee,
+      dueDate: this.dueDate,
       status: this.status,
     }
   }
