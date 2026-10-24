@@ -15,7 +15,7 @@ const columnStatusKeys = [
 ];
 
 function findTask(taskId) {
-  return taskManager.getAllTasks().find((task) => String(task.id) === taskId) || null;
+  return taskManager.getAllTasks().find((task) => String(task.id) === String(taskId)) || null;
 }
 
 function taskCardTemplate(card) {
@@ -100,10 +100,7 @@ function taskCardTemplate(card) {
         ${dueDateSlotHtml}
         ${statusChipTemplate({ status, label: statusLabels[status] })}
         ${tagsRowTemplate(tags)}
-        <div class="comments-count">
-          <i class="ri-chat-3-line comment-icon"></i>
-          <span>${comments} Comments</span>
-        </div>
+        ${commentsCountTemplate(comments)}
       </div>
     </div>
   `;
@@ -239,16 +236,10 @@ function openDueDatepicker(anchor, task) {
   $(dueDateInput).datepicker("show");
 }
 
-function refreshTaskCard(task) {
-  const cardEl = document.querySelector(`.task-card[data-task-id="${task.id}"]`);
-  if (cardEl) cardEl.outerHTML = taskCardTemplate(task);
-}
-
 $(dueDateInput).on("changeDate", (event) => {
   const task = findTask(activeDueDateTaskId);
   if (task) {
-    task.dueDate = event.format();
-    refreshTaskCard(task);
+    taskManager.updateTask(task.id, { ...task, dueDate: event.format() });
   }
   closeAllPopups();
 });
@@ -256,8 +247,7 @@ $(dueDateInput).on("changeDate", (event) => {
 clearDateBtn.addEventListener("click", () => {
   const task = findTask(activeDueDateTaskId);
   if (task) {
-    task.dueDate = null;
-    refreshTaskCard(task);
+    taskManager.updateTask(task.id, { ...task, dueDate: null });
   }
   closeAllPopups();
 });
@@ -290,8 +280,8 @@ document.addEventListener("click", (event) => {
     const task = findTask(activeAssigneeTaskId);
     if (task) {
       const userIndex = Number(pickerItem.dataset.userIndex);
-      task.assignee = userIndex >= 0 ? team[userIndex] || null : null;
-      refreshTaskCard(task);
+      const assignee = userIndex >= 0 ? team[userIndex] || null : null;
+      taskManager.updateTask(task.id, { ...task, assignee });
     }
     closeAllPopups();
     return;
