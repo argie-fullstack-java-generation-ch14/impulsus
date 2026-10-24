@@ -234,4 +234,10 @@
 .is-invalid {
   border-color: #dc2626 !important;
   box-shadow: 0 0 0 1px #dc2626 !important;
+  border-radius: 8px;
+}
+
+.assignee-select.is-invalid .assignee-select__toggle {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 1px #dc2626 !important;
 }
