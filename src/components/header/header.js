@@ -2,7 +2,6 @@ function renderHeaderAvatar() {
   const mount = document.getElementById("headerAvatar");
   if (!mount) return false;
 
-  const user = users[0];
   mount.innerHTML = userAvatarTemplate({ src: user.src, alt: user.name, size: "lg" });
   return true;
 }
