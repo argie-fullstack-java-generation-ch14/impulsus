@@ -1,6 +1,6 @@
 const user = {
   name: "Argie Rincón",
-  src: "https://res.cloudinary.com/dvvwfb2tr/image/upload/v1791561044/IMG_1545_2_zw8gnn.jpg",
+  src: "https://res.cloudinary.com/dvvwfb2tr/image/upload/v1792865803/generation/AVATAR_ARGIE_vtyuul.svg",
   role: "UI Designer",
 };
 
