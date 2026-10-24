@@ -13,32 +13,6 @@ const users = [
   },
 ];
 
-const baseTask = {
-  title:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  assignee: null,
-  dueDate: null,
-  status: { status: "in-progress", label: "En Progreso" },
-  tags: [
-    { label: "Marketing", color: "purple" },
-    { label: "Optimization", color: "purple" },
-  ],
-  comments: 2,
-};
-
-let taskCounter = 0;
-
-function createTask(overrides = {}) {
-  taskCounter += 1;
-  return {
-    ...baseTask,
-    id: `task-${taskCounter}`,
-    ...overrides,
-  };
-}
-
 const taskColumnIds = [
   "taskColumnPending",
   "taskColumnInProgress",
@@ -47,23 +21,16 @@ const taskColumnIds = [
   "taskColumnCompleted",
 ];
 
-const taskColumns = [
-  [
-    createTask({ assignee: users[0], dueDate: "12/10/2026" }),
-    createTask({ tags: [] }),
-  ],
-  [createTask(), createTask(), createTask()],
-  [createTask()],
-  [createTask(), createTask()],
-  [createTask(), createTask(), createTask(), createTask()],
+const columnStatusKeys = [
+  "pending",
+  "in-progress",
+  "blocked",
+  "paused",
+  "done",
 ];
 
 function findTask(taskId) {
-  for (const column of taskColumns) {
-    const task = column.find((item) => item.id === taskId);
-    if (task) return task;
-  }
-  return null;
+  return taskManager.getAllTasks().find((task) => String(task.id) === taskId) || null;
 }
 
 function taskCardTemplate(card) {
@@ -74,8 +41,8 @@ function taskCardTemplate(card) {
     assignee,
     dueDate,
     status,
-    tags,
-    comments,
+    tags = [],
+    comments = 0,
   } = card;
 
   const assigneeHtml = assignee
@@ -146,7 +113,7 @@ function taskCardTemplate(card) {
         ${unassignSlotHtml}
         ${dueDateHtml}
         ${dueDateSlotHtml}
-        ${statusChipTemplate(status)}
+        ${statusChipTemplate({ status, label: statusLabels[status] })}
         ${tagsRowTemplate(tags)}
         <div class="comments-count">
           <i class="ri-chat-3-line comment-icon"></i>
@@ -162,7 +129,7 @@ function renderTaskCards() {
   if (!mounts.every(Boolean)) return false;
 
   mounts.forEach((mount, index) => {
-    const tasks = taskColumns[index] || [];
+    const tasks = taskManager.getTasksWithStatus(columnStatusKeys[index]);
     mount.innerHTML = tasks.map(taskCardTemplate).join("");
   });
   return true;
@@ -174,6 +141,8 @@ if (!renderTaskCards()) {
   });
   observer.observe(document.body, { childList: true, subtree: true });
 }
+
+taskManager.subscribe(renderTaskCards);
 
 const assigneePicker = document.createElement("div");
 assigneePicker.className = "assignee-picker";
