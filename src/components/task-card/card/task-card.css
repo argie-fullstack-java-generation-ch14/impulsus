@@ -209,6 +209,44 @@
   margin: 4px 6px;
 }
 
+.status-picker {
+  position: absolute;
+  z-index: 40;
+  min-width: 150px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.status-picker[hidden] {
+  display: none;
+}
+
+.status-picker__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.status-picker__item:hover {
+  background-color: #f1f5f9;
+}
+
+.status-picker__item .status-badge {
+  pointer-events: none;
+}
+
 .due-date-picker {
   position: absolute;
   z-index: 40;

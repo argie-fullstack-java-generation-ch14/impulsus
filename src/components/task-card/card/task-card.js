@@ -134,6 +134,19 @@ assigneePicker.innerHTML = `
 `;
 document.body.appendChild(assigneePicker);
 
+const statusPicker = document.createElement("div");
+statusPicker.className = "status-picker";
+statusPicker.hidden = true;
+statusPicker.innerHTML = columnStatusKeys
+  .map(
+    (statusKey) => `
+    <button type="button" class="status-picker__item" data-status="${statusKey}">
+      ${statusChipTemplate({ status: statusKey, label: statusLabels[statusKey] })}
+    </button>`
+  )
+  .join("");
+document.body.appendChild(statusPicker);
+
 const dueDateWrapper = document.createElement("div");
 dueDateWrapper.className = "due-date-picker";
 dueDateWrapper.hidden = true;
@@ -168,8 +181,10 @@ $(dueDateInput).datepicker({
 
 let activeAssigneeTaskId = null;
 let activeDueDateTaskId = null;
+let activeStatusTaskId = null;
 let activeAssigneeAnchor = null;
 let activeDueDateAnchor = null;
+let activeStatusAnchor = null;
 
 function positionPopup(popup, anchor) {
   const rect = anchor.getBoundingClientRect();
@@ -183,6 +198,9 @@ function repositionActivePopups() {
   }
   if (!dueDateWrapper.hidden && activeDueDateAnchor) {
     positionPopup(dueDateWrapper, activeDueDateAnchor);
+  }
+  if (!statusPicker.hidden && activeStatusAnchor) {
+    positionPopup(statusPicker, activeStatusAnchor);
   }
 }
 
@@ -204,6 +222,10 @@ function closeAllPopups() {
   dueDateWrapper.hidden = true;
   activeDueDateTaskId = null;
   activeDueDateAnchor = null;
+
+  statusPicker.hidden = true;
+  activeStatusTaskId = null;
+  activeStatusAnchor = null;
 }
 
 function openAssigneePicker(anchor, task) {
@@ -211,6 +233,13 @@ function openAssigneePicker(anchor, task) {
   assigneePicker.hidden = false;
   activeAssigneeTaskId = task.id;
   activeAssigneeAnchor = anchor;
+}
+
+function openStatusPicker(anchor, task) {
+  positionPopup(statusPicker, anchor);
+  statusPicker.hidden = false;
+  activeStatusTaskId = task.id;
+  activeStatusAnchor = anchor;
 }
 
 function openDueDatepicker(anchor, task) {
@@ -274,6 +303,30 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const statusTarget = event.target.closest(".status-badge");
+  if (statusTarget && !event.target.closest(".status-picker")) {
+    const card = statusTarget.closest(".task-card");
+    const task = findTask(card?.dataset.taskId);
+    if (!task) return;
+    const wasOpen = !statusPicker.hidden && activeStatusTaskId === task.id;
+    closeAllPopups();
+    if (!wasOpen) openStatusPicker(statusTarget, task);
+    return;
+  }
+
+  const statusItem = event.target.closest(".status-picker__item");
+  if (statusItem) {
+    const task = findTask(activeStatusTaskId);
+    if (task) {
+      const newStatus = statusItem.dataset.status;
+      if (newStatus && newStatus !== task.status) {
+        taskManager.updateTask(task.id, { ...task, status: newStatus });
+      }
+    }
+    closeAllPopups();
+    return;
+  }
+
   const optionsBtn = event.target.closest(".options-btn");
   if (optionsBtn) {
     const tooltip = optionsBtn.parentElement.querySelector(".options-tooltip");
@@ -293,7 +346,10 @@ document.addEventListener("click", (event) => {
     const title = card?.querySelector(".card-title")?.textContent?.trim();
 
     if (action === "edit") {
-      console.log("Editar tarea:", title);
+      const task = findTask(card?.dataset.taskId);
+      if (task && typeof window.openEditTaskModal === "function") {
+        window.openEditTaskModal(task);
+      }
     } else if (action === "tags") {
       const task = findTask(card?.dataset.taskId);
       const hasTags = task && Array.isArray(task.tags) && task.tags.length > 0;
@@ -312,6 +368,7 @@ document.addEventListener("click", (event) => {
   if (
     !event.target.closest(".assignee-picker") &&
     !event.target.closest(".due-date-picker") &&
+    !event.target.closest(".status-picker") &&
     !event.target.closest(".options-tooltip")
   ) {
     closeAllPopups();
