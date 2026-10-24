@@ -20,6 +20,8 @@
 
     toggle.textContent = item.textContent.trim();
     toggle.dataset.status = statusKey;
+    toggle.classList.remove("is-invalid");
+    toggle.setCustomValidity("");
   }
 
   function setAssignee(userIndex) {
@@ -38,6 +40,8 @@
         </span>
       `;
       toggle.dataset.userIndex = String(index);
+      toggle.classList.remove("is-invalid");
+      toggle.setCustomValidity("");
     } else {
       toggle.innerHTML = assigneePlaceholderHtml;
       delete toggle.dataset.userIndex;
@@ -70,6 +74,85 @@
         .join("")}
     `;
   }
+
+  function validateTaskForm(nombre, descripcion, asignadoA, fechaEntrega, estado) {
+    if (typeof nombre === "object" && nombre !== null && !(nombre instanceof String)) {
+      const data = nombre;
+      nombre = data.nombre || data.name || data.title || "";
+      descripcion = data.descripcion || data.description || "";
+      asignadoA = data.asignadoA || data.assignedTo || data.assignee || "";
+      fechaEntrega = data.fechaEntrega || data.dueDate || "";
+      estado = data.estado || data.status || "";
+    }
+
+    if (arguments.length === 0) {
+      const modalEl = getModalEl();
+      if (modalEl) {
+        nombre = modalEl.querySelector("#taskName")?.value || "";
+        descripcion = modalEl.querySelector("#taskDescription")?.value || "";
+        const assigneeToggle = modalEl.querySelector("#assigneeToggle");
+        const assigneeIndex = Number(assigneeToggle?.dataset.userIndex);
+        const user = typeof team !== "undefined" && assigneeIndex >= 0 ? team[assigneeIndex] : null;
+        asignadoA = user ? user.name : (assigneeToggle?.textContent || "");
+        fechaEntrega = modalEl.querySelector("#dueDate")?.value || "";
+        estado = modalEl.querySelector("#taskStatusToggle")?.dataset.status || "";
+      }
+    }
+
+    const getStr = (val) => {
+      if (val === null || val === undefined) return "";
+      if (typeof val === "object" && val.name) return String(val.name).trim();
+      return String(val).trim();
+    };
+
+    const nameStr = getStr(nombre);
+    const descStr = getStr(descripcion);
+    const dateStr = getStr(fechaEntrega);
+    const statusStr = getStr(estado);
+
+    let isAssigneeValid = false;
+    if (typeof asignadoA === "object" && asignadoA !== null) {
+      isAssigneeValid = Boolean(asignadoA.name && String(asignadoA.name).trim().length > 0);
+    } else if (typeof asignadoA === "number") {
+      isAssigneeValid = asignadoA >= 0;
+    } else {
+      const str = String(asignadoA || "").trim();
+      isAssigneeValid = str.length > 0 && str !== "Sin asignar" && !str.includes("Selecciona");
+    }
+
+    const isNameValid = nameStr.length > 8;
+    const isDescValid = descStr.length > 15;
+    const isDateValid = dateStr.length > 0;
+    const isStatusValid = statusStr.length > 0;
+
+    const modalEl = getModalEl();
+    if (modalEl) {
+      const setFieldValidity = (el, isValid, wrapper = null) => {
+        if (!el) return;
+        const target = wrapper || el;
+        if (isValid) {
+          target.classList.remove("is-invalid");
+          el.setCustomValidity("");
+        } else {
+          target.classList.add("is-invalid");
+        }
+      };
+
+      setFieldValidity(modalEl.querySelector("#taskName"), isNameValid);
+      setFieldValidity(
+        modalEl.querySelector("#taskDescription"),
+        isDescValid,
+        modalEl.querySelector("#taskDescriptionWrapper")
+      );
+      setFieldValidity(modalEl.querySelector("#assigneeToggle"), isAssigneeValid);
+      setFieldValidity(modalEl.querySelector("#dueDate"), isDateValid);
+      setFieldValidity(modalEl.querySelector("#taskStatusToggle"), isStatusValid);
+    }
+
+    return isNameValid && isDescValid && isAssigneeValid && isDateValid && isStatusValid;
+  }
+
+  window.validateTaskForm = validateTaskForm;
 
   function openEditTaskModal(task) {
     const modalEl = getModalEl();
@@ -159,6 +242,11 @@
       const assigneeIndex = Number(modalEl.querySelector("#assigneeToggle")?.dataset.userIndex);
       const assignee = typeof team !== "undefined" && assigneeIndex >= 0 ? team[assigneeIndex] : null;
 
+      if (!validateTaskForm(title, description, assignee, dueDate, status)) {
+        form?.reportValidity();
+        return;
+      }
+
       if (editingTaskId) {
         const existingTask = taskManager.getAllTasks().find((t) => String(t.id) === String(editingTaskId));
         const updatedTask = new Task(
@@ -185,9 +273,6 @@
       }
 
       bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-
-      console.log("Nueva tarea:", newTask.getTask());
-      console.log("Total tareas:", taskManager.getAllTasks().length);
     });
 
 
@@ -211,8 +296,29 @@
       });
     }
 
+    const clearError = (el, wrapper = null) => {
+      if (!el) return;
+      (wrapper || el).classList.remove("is-invalid");
+      el.setCustomValidity("");
+    };
+
+    modalEl.querySelector("#taskName")?.addEventListener("input", (e) => clearError(e.target));
+    modalEl.querySelector("#taskDescription")?.addEventListener("input", (e) =>
+      clearError(e.target, modalEl.querySelector("#taskDescriptionWrapper"))
+    );
+    modalEl.querySelector("#dueDate")?.addEventListener("input", (e) => clearError(e.target));
+    modalEl.querySelector("#dueDate")?.addEventListener("change", (e) => clearError(e.target));
+
     modalEl.addEventListener("hidden.bs.modal", () => {
       editingTaskId = null;
+
+      ["#taskName", "#taskDescriptionWrapper", "#assigneeToggle", "#dueDate", "#taskStatusToggle"].forEach((selector) => {
+        const el = modalEl.querySelector(selector);
+        if (el) {
+          el.classList.remove("is-invalid");
+          el.setCustomValidity("");
+        }
+      });
 
       const modalTitle = modalEl.querySelector("#taskFormModalLabel");
       if (modalTitle) modalTitle.textContent = "Crear tarea";

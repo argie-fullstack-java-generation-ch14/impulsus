@@ -21,6 +21,7 @@
             </label>
             <input type="text" class="form-control create-task-form__input" id="taskName"
               placeholder="Ingresa el título de la tarea">
+            <div class="form-feedback" id="taskNameFeedback">El título es obligatorio y debe tener más de 8 caracteres.</div>
           </div>
 
           <div class="col-12 col-md-3">
@@ -43,6 +44,7 @@
                 <li><a class="dropdown-item" href="#" data-status="done">Completado</a></li>
               </ul>
             </div>
+            <div class="form-feedback" id="taskStatusFeedback">Selecciona un estado.</div>
           </div>
         </div>
 
@@ -50,10 +52,11 @@
           <label for="taskDescription" class="create-task-form__label">
             Descripción
           </label>
-          <div class="create-task-form__description">
+          <div class="create-task-form__description" id="taskDescriptionWrapper">
             <textarea id="taskDescription" class="form-description"
               placeholder="Ingresa la descripción de la tarea"></textarea>
           </div>
+          <div class="form-feedback" id="taskDescriptionFeedback">La descripción es obligatoria y debe tener más de 15 caracteres.</div>
         </div>
 
         <div class="row g-3 mb-3">
@@ -73,6 +76,7 @@
               <ul class="dropdown-menu assignee-select__menu" id="assigneeMenu"
                 aria-labelledby="assigneeToggle"></ul>
             </div>
+            <div class="form-feedback" id="assigneeFeedback">Selecciona una persona asignada.</div>
           </div>
 
           <div class="col-md-6">
@@ -80,6 +84,7 @@
 
             <input type="text" class="form-control create-task-form__input" id="dueDate"
               placeholder="dd/mm/aaaa" autocomplete="off">
+            <div class="form-feedback" id="dueDateFeedback">Ingresa una fecha límite.</div>
           </div>
         </div>
 
