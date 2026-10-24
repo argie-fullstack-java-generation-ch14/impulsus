@@ -299,7 +299,10 @@ document.addEventListener("click", (event) => {
       const hasTags = task && Array.isArray(task.tags) && task.tags.length > 0;
       console.log(hasTags ? "Editar etiquetas:" : "Agregar etiquetas:", title);
     } else if (action === "delete") {
-      console.log("Eliminar tarea:", title);
+      const task = findTask(card?.dataset.taskId);
+      if (task) {
+        taskManager.deleteTask(task.id);
+      }
     }
 
     closeAllPopups();

@@ -23,14 +23,14 @@ class TaskManager {
   }
 
   deleteTask(taskId) {
-    this.taskList = this.taskList.filter(task => task.id !== taskId);
+    this.taskList = this.taskList.filter(task => String(task.id) !== String(taskId));
     this.notify();
   }
 
   updateTask(taskId, newTask) {
-    let task = this.taskList.findIndex(task => task.id === taskId);
+    let task = this.taskList.findIndex(task => String(task.id) === String(taskId));
     if (task === -1) return;
-    newTask.id = taskId;
+    newTask.id = this.taskList[task].id;
     this.taskList[task] = newTask;
     this.notify();
   }
