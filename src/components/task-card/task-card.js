@@ -98,7 +98,7 @@ function taskCardTemplate(card) {
     ? `
         <div class="due-date">
           <i class="ri-calendar-event-line"></i>
-          <span>Fecha líminte:</span>
+          <span>Fecha límite:</span>
           <span>${dueDate}</span>
         </div>`
     : "";
@@ -211,6 +211,12 @@ clearDateBtn.type = "button";
 clearDateBtn.className = "clear-date-btn";
 clearDateBtn.textContent = "Quitar fecha";
 dueDateWrapper.appendChild(clearDateBtn);
+
+["mousedown", "touchstart"].forEach((eventName) => {
+  clearDateBtn.addEventListener(eventName, (event) => {
+    event.stopPropagation();
+  });
+});
 
 document.body.appendChild(dueDateWrapper);
 
