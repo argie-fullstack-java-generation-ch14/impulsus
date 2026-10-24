@@ -1,18 +1,7 @@
-const teamMembers = [
-  {
-    avatar: {
-      src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-      alt: "Theresa Webb",
-    },
-    name: "Theresa Webb",
-    role: "UI Designer",
-  },
-];
-
-function teamCardTemplate({ avatar, name, role }) {
+function teamCardTemplate({ name, src, role }) {
   return `
     <div class="team-member">
-      ${userAvatarTemplate(avatar)}
+      ${userAvatarTemplate({ src, alt: name })}
       <div class="member-info">
         <div class="name">${name}</div>
         <div class="role">${role}</div>
@@ -25,7 +14,7 @@ function renderTeamCards() {
   const mount = document.getElementById("teamList");
   if (!mount) return false;
 
-  mount.innerHTML = teamMembers.map(teamCardTemplate).join("");
+  mount.innerHTML = team.map(teamCardTemplate).join("");
   return true;
 }
 

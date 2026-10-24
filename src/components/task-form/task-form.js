@@ -1,4 +1,5 @@
 (() => {
+  let editingTaskId = null;
   const defaultStatus = "pending";
   const assigneePlaceholderHtml = `
     <span class="assignee-select__placeholder">
@@ -8,6 +9,8 @@
   `;
 
   const getModalEl = () => document.getElementById("taskFormModal");
+  let modalTrigger = null;
+  const { validateTaskForm, clearFieldError, clearModalErrors } = window.TaskFormValidation;
 
   function setStatus(statusKey) {
     const modalEl = getModalEl();
@@ -19,6 +22,7 @@
 
     toggle.textContent = item.textContent.trim();
     toggle.dataset.status = statusKey;
+    clearFieldError(toggle);
   }
 
   function setAssignee(userIndex) {
@@ -27,7 +31,7 @@
     if (!toggle) return;
 
     const index = Number(userIndex);
-    const user = typeof users !== "undefined" ? users[index] : null;
+    const user = typeof team !== "undefined" ? team[index] : null;
 
     if (user) {
       toggle.innerHTML = `
@@ -37,6 +41,7 @@
         </span>
       `;
       toggle.dataset.userIndex = String(index);
+      clearFieldError(toggle, modalEl.querySelector(".assignee-select"));
     } else {
       toggle.innerHTML = assigneePlaceholderHtml;
       delete toggle.dataset.userIndex;
@@ -46,7 +51,7 @@
   function buildAssigneeMenu() {
     const modalEl = getModalEl();
     const menu = modalEl?.querySelector("#assigneeMenu");
-    if (!menu || typeof users === "undefined") return;
+    if (!menu || typeof team === "undefined") return;
 
     menu.innerHTML = `
       <li>
@@ -56,7 +61,7 @@
         </button>
       </li>
       <li><div class="assignee-picker__divider" role="separator"></div></li>
-      ${users
+      ${team
         .map(
           (user, index) => `
         <li>
@@ -70,12 +75,63 @@
     `;
   }
 
+  function openEditTaskModal(task) {
+    const modalEl = getModalEl();
+    if (!modalEl || !task) return;
+
+    modalTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    editingTaskId = task.id;
+
+    const modalTitle = modalEl.querySelector("#taskFormModalLabel");
+    if (modalTitle) modalTitle.textContent = "Editar tarea";
+
+    const submitBtn = modalEl.querySelector("button[type='submit']");
+    if (submitBtn) submitBtn.textContent = "Guardar";
+
+    const nameInput = modalEl.querySelector("#taskName");
+    if (nameInput) nameInput.value = task.title || "";
+
+    const descInput = modalEl.querySelector("#taskDescription");
+    if (descInput) descInput.value = task.description || "";
+
+    setStatus(task.status || defaultStatus);
+
+    let userIndex = -1;
+    if (task.assignee && typeof team !== "undefined") {
+      userIndex = team.findIndex(
+        (u) => u.name === task.assignee.name || u.src === task.assignee.src
+      );
+    }
+    setAssignee(userIndex);
+
+    const dueDateInput = modalEl.querySelector("#dueDate");
+    if (dueDateInput) {
+      dueDateInput.value = task.dueDate || "";
+      if (window.jQuery && jQuery.fn.datepicker) {
+        jQuery(dueDateInput).datepicker("update", task.dueDate || "");
+      }
+    }
+
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
+
+  window.openEditTaskModal = openEditTaskModal;
+
   document.addEventListener("click", (event) => {
     const addBtn = event.target.closest(".add-task-btn, .add-task-header-btn");
     if (!addBtn) return;
 
     const modalEl = getModalEl();
     if (!modalEl) return;
+
+    modalTrigger = addBtn;
+    editingTaskId = null;
+
+    const modalTitle = modalEl.querySelector("#taskFormModalLabel");
+    if (modalTitle) modalTitle.textContent = "Crear tarea";
+
+    const submitBtn = modalEl.querySelector("button[type='submit']");
+    if (submitBtn) submitBtn.textContent = "Crear";
 
     const column = addBtn.closest(".column-container");
     setStatus(column?.dataset.status || defaultStatus);
@@ -96,10 +152,53 @@
       });
     });
 
+    // paso 1 - task 3
     const form = modalEl.querySelector("#createTaskForm");
     form?.addEventListener("submit", (event) => {
       event.preventDefault();
+
+      const title = modalEl.querySelector("#taskName")?.value.trim() || "";
+      const description = modalEl.querySelector("#taskDescription")?.value.trim() || "";
+      const status = modalEl.querySelector("#taskStatusToggle")?.dataset.status || defaultStatus;
+      const dueDate = modalEl.querySelector("#dueDate")?.value || null;
+
+      const assigneeIndex = Number(modalEl.querySelector("#assigneeToggle")?.dataset.userIndex);
+      const assignee = typeof team !== "undefined" && assigneeIndex >= 0 ? team[assigneeIndex] : null;
+
+      if (!validateTaskForm(title, description, assignee, dueDate, status)) {
+        form?.reportValidity();
+        return;
+      }
+
+      if (editingTaskId) {
+        const existingTask = taskManager.getAllTasks().find((t) => String(t.id) === String(editingTaskId));
+        const updatedTask = new Task(
+          Number(editingTaskId) || editingTaskId,
+          title,
+          description,
+          assignee,
+          dueDate,
+          status
+        );
+        if (existingTask) {
+          updatedTask.tags = existingTask.tags || [];
+          updatedTask.comments = existingTask.comments || 0;
+        }
+        taskManager.updateTask(editingTaskId, updatedTask);
+
+        console.log("Tarea actualizada:", updatedTask.getTask ? updatedTask.getTask() : updatedTask);
+      } else {
+        const newTask = new Task(null, title, description, assignee, dueDate, status);
+        taskManager.addTask(newTask);
+
+        console.log("Nueva tarea:", newTask.getTask());
+        console.log("Total tareas:", taskManager.getAllTasks().length);
+      }
+
+      bootstrap.Modal.getOrCreateInstance(modalEl).hide();
     });
+
+
 
     buildAssigneeMenu();
 
@@ -110,9 +209,9 @@
       setAssignee(item.dataset.userIndex);
     });
 
-    const deadlineInput = modalEl.querySelector("#deadline");
-    if (window.jQuery && jQuery.fn.datepicker && deadlineInput) {
-      jQuery(deadlineInput).datepicker({
+    const dueDateInput = modalEl.querySelector("#dueDate");
+    if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
+      jQuery(dueDateInput).datepicker({
         format: "dd/mm/yyyy",
         language: "es",
         autoclose: true,
@@ -120,13 +219,44 @@
       });
     }
 
+    modalEl.querySelector("#taskName")?.addEventListener("input", (e) => clearFieldError(e.target));
+    modalEl.querySelector("#taskDescription")?.addEventListener("input", (e) =>
+      clearFieldError(e.target, modalEl.querySelector("#taskDescriptionWrapper"))
+    );
+    modalEl.querySelector("#dueDate")?.addEventListener("input", (e) => clearFieldError(e.target));
+    modalEl.querySelector("#dueDate")?.addEventListener("change", (e) => clearFieldError(e.target));
+    if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
+      jQuery(dueDateInput).on("changeDate", () => clearFieldError(dueDateInput));
+    }
+
+    modalEl.addEventListener("hide.bs.modal", () => {
+      if (modalEl.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+    });
+
     modalEl.addEventListener("hidden.bs.modal", () => {
+      editingTaskId = null;
+      clearModalErrors(modalEl);
+
+      const modalTitle = modalEl.querySelector("#taskFormModalLabel");
+      if (modalTitle) modalTitle.textContent = "Crear tarea";
+
+      const submitBtn = modalEl.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.textContent = "Crear";
+
       form?.reset();
       setStatus(defaultStatus);
       setAssignee(-1);
-      if (window.jQuery && jQuery.fn.datepicker && deadlineInput) {
-        jQuery(deadlineInput).datepicker("hide");
+      if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
+        jQuery(dueDateInput).datepicker("update", "");
+        jQuery(dueDateInput).datepicker("hide");
       }
+
+      if (modalTrigger?.isConnected) {
+        modalTrigger.focus();
+      }
+      modalTrigger = null;
     });
 
     return true;

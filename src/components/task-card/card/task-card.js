@@ -1,44 +1,3 @@
-const users = [
-  {
-    name: "Argie Rincón",
-    src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "María Gómez",
-    src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "Carlos Pérez",
-    src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80",
-  },
-];
-
-const baseTask = {
-  title:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  assignee: null,
-  dueDate: null,
-  status: { status: "in-progress", label: "En Progreso" },
-  tags: [
-    { label: "Marketing", color: "purple" },
-    { label: "Optimization", color: "purple" },
-  ],
-  comments: 2,
-};
-
-let taskCounter = 0;
-
-function createTask(overrides = {}) {
-  taskCounter += 1;
-  return {
-    ...baseTask,
-    id: `task-${taskCounter}`,
-    ...overrides,
-  };
-}
-
 const taskColumnIds = [
   "taskColumnPending",
   "taskColumnInProgress",
@@ -47,23 +6,16 @@ const taskColumnIds = [
   "taskColumnCompleted",
 ];
 
-const taskColumns = [
-  [
-    createTask({ assignee: users[0], dueDate: "12/10/2026" }),
-    createTask({ tags: [] }),
-  ],
-  [createTask(), createTask(), createTask()],
-  [createTask()],
-  [createTask(), createTask()],
-  [createTask(), createTask(), createTask(), createTask()],
+const columnStatusKeys = [
+  "pending",
+  "in-progress",
+  "blocked",
+  "paused",
+  "done",
 ];
 
 function findTask(taskId) {
-  for (const column of taskColumns) {
-    const task = column.find((item) => item.id === taskId);
-    if (task) return task;
-  }
-  return null;
+  return taskManager.getAllTasks().find((task) => String(task.id) === String(taskId)) || null;
 }
 
 function taskCardTemplate(card) {
@@ -74,8 +26,8 @@ function taskCardTemplate(card) {
     assignee,
     dueDate,
     status,
-    tags,
-    comments,
+    tags = [],
+    comments = 0,
   } = card;
 
   const assigneeHtml = assignee
@@ -98,7 +50,7 @@ function taskCardTemplate(card) {
     ? `
         <div class="due-date">
           <i class="ri-calendar-event-line"></i>
-          <span>Fecha líminte:</span>
+          <span>Fecha límite:</span>
           <span>${dueDate}</span>
         </div>`
     : "";
@@ -122,20 +74,7 @@ function taskCardTemplate(card) {
           <button type="button" class="options-btn" aria-label="Opciones" aria-haspopup="true" aria-expanded="false">
             <i class="ri-more-2-fill"></i>
           </button>
-          <div class="options-tooltip" hidden>
-            <button type="button" class="tooltip-action" data-action="edit">
-              <i class="ri-edit-box-line"></i>
-              <span>Editar</span>
-            </button>
-            <button type="button" class="tooltip-action" data-action="tags">
-              <i class="ri-price-tag-line"></i>
-              <span>${tagsActionLabel}</span>
-            </button>
-            <button type="button" class="tooltip-action tooltip-action--danger" data-action="delete">
-              <i class="ri-delete-bin-line"></i>
-              <span>Eliminar</span>
-            </button>
-          </div>
+          ${optionsTooltipTemplate({ tagsActionLabel })}
         </div>
       </div>
 
@@ -146,15 +85,12 @@ function taskCardTemplate(card) {
         ${unassignSlotHtml}
         ${dueDateHtml}
         ${dueDateSlotHtml}
-        ${statusChipTemplate(status)}
+        ${statusChipTemplate({ status, label: statusLabels[status] })}
         ${tagsRowTemplate(tags)}
-        <div class="comments-count">
-          <i class="ri-chat-3-line comment-icon"></i>
-          <span>${comments} Comments</span>
         </div>
-      </div>
-    </div>
-  `;
+        </div>
+        `;
+  // ${commentsCountTemplate(comments)}
 }
 
 function renderTaskCards() {
@@ -162,7 +98,7 @@ function renderTaskCards() {
   if (!mounts.every(Boolean)) return false;
 
   mounts.forEach((mount, index) => {
-    const tasks = taskColumns[index] || [];
+    const tasks = taskManager.getTasksWithStatus(columnStatusKeys[index]);
     mount.innerHTML = tasks.map(taskCardTemplate).join("");
   });
   return true;
@@ -175,6 +111,8 @@ if (!renderTaskCards()) {
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
+taskManager.subscribe(renderTaskCards);
+
 const assigneePicker = document.createElement("div");
 assigneePicker.className = "assignee-picker";
 assigneePicker.hidden = true;
@@ -184,7 +122,7 @@ assigneePicker.innerHTML = `
     <span>Sin asignar</span>
   </button>
   <div class="assignee-picker__divider" role="separator"></div>
-  ${users
+  ${team
     .map(
       (user, index) => `
       <button type="button" class="assignee-picker__item" data-user-index="${index}">
@@ -195,6 +133,19 @@ assigneePicker.innerHTML = `
     .join("")}
 `;
 document.body.appendChild(assigneePicker);
+
+const statusPicker = document.createElement("div");
+statusPicker.className = "status-picker";
+statusPicker.hidden = true;
+statusPicker.innerHTML = columnStatusKeys
+  .map(
+    (statusKey) => `
+    <button type="button" class="status-picker__item" data-status="${statusKey}">
+      ${statusChipTemplate({ status: statusKey, label: statusLabels[statusKey] })}
+    </button>`
+  )
+  .join("");
+document.body.appendChild(statusPicker);
 
 const dueDateWrapper = document.createElement("div");
 dueDateWrapper.className = "due-date-picker";
@@ -212,6 +163,12 @@ clearDateBtn.className = "clear-date-btn";
 clearDateBtn.textContent = "Quitar fecha";
 dueDateWrapper.appendChild(clearDateBtn);
 
+["mousedown", "touchstart"].forEach((eventName) => {
+  clearDateBtn.addEventListener(eventName, (event) => {
+    event.stopPropagation();
+  });
+});
+
 document.body.appendChild(dueDateWrapper);
 
 $(dueDateInput).datepicker({
@@ -224,8 +181,10 @@ $(dueDateInput).datepicker({
 
 let activeAssigneeTaskId = null;
 let activeDueDateTaskId = null;
+let activeStatusTaskId = null;
 let activeAssigneeAnchor = null;
 let activeDueDateAnchor = null;
+let activeStatusAnchor = null;
 
 function positionPopup(popup, anchor) {
   const rect = anchor.getBoundingClientRect();
@@ -239,6 +198,9 @@ function repositionActivePopups() {
   }
   if (!dueDateWrapper.hidden && activeDueDateAnchor) {
     positionPopup(dueDateWrapper, activeDueDateAnchor);
+  }
+  if (!statusPicker.hidden && activeStatusAnchor) {
+    positionPopup(statusPicker, activeStatusAnchor);
   }
 }
 
@@ -260,6 +222,10 @@ function closeAllPopups() {
   dueDateWrapper.hidden = true;
   activeDueDateTaskId = null;
   activeDueDateAnchor = null;
+
+  statusPicker.hidden = true;
+  activeStatusTaskId = null;
+  activeStatusAnchor = null;
 }
 
 function openAssigneePicker(anchor, task) {
@@ -267,6 +233,13 @@ function openAssigneePicker(anchor, task) {
   assigneePicker.hidden = false;
   activeAssigneeTaskId = task.id;
   activeAssigneeAnchor = anchor;
+}
+
+function openStatusPicker(anchor, task) {
+  positionPopup(statusPicker, anchor);
+  statusPicker.hidden = false;
+  activeStatusTaskId = task.id;
+  activeStatusAnchor = anchor;
 }
 
 function openDueDatepicker(anchor, task) {
@@ -279,16 +252,10 @@ function openDueDatepicker(anchor, task) {
   $(dueDateInput).datepicker("show");
 }
 
-function refreshTaskCard(task) {
-  const cardEl = document.querySelector(`.task-card[data-task-id="${task.id}"]`);
-  if (cardEl) cardEl.outerHTML = taskCardTemplate(task);
-}
-
 $(dueDateInput).on("changeDate", (event) => {
   const task = findTask(activeDueDateTaskId);
   if (task) {
-    task.dueDate = event.format();
-    refreshTaskCard(task);
+    taskManager.updateTask(task.id, { ...task, dueDate: event.format() });
   }
   closeAllPopups();
 });
@@ -296,8 +263,7 @@ $(dueDateInput).on("changeDate", (event) => {
 clearDateBtn.addEventListener("click", () => {
   const task = findTask(activeDueDateTaskId);
   if (task) {
-    task.dueDate = null;
-    refreshTaskCard(task);
+    taskManager.updateTask(task.id, { ...task, dueDate: null });
   }
   closeAllPopups();
 });
@@ -330,8 +296,32 @@ document.addEventListener("click", (event) => {
     const task = findTask(activeAssigneeTaskId);
     if (task) {
       const userIndex = Number(pickerItem.dataset.userIndex);
-      task.assignee = userIndex >= 0 ? users[userIndex] || null : null;
-      refreshTaskCard(task);
+      const assignee = userIndex >= 0 ? team[userIndex] || null : null;
+      taskManager.updateTask(task.id, { ...task, assignee });
+    }
+    closeAllPopups();
+    return;
+  }
+
+  const statusTarget = event.target.closest(".status-badge");
+  if (statusTarget && !event.target.closest(".status-picker")) {
+    const card = statusTarget.closest(".task-card");
+    const task = findTask(card?.dataset.taskId);
+    if (!task) return;
+    const wasOpen = !statusPicker.hidden && activeStatusTaskId === task.id;
+    closeAllPopups();
+    if (!wasOpen) openStatusPicker(statusTarget, task);
+    return;
+  }
+
+  const statusItem = event.target.closest(".status-picker__item");
+  if (statusItem) {
+    const task = findTask(activeStatusTaskId);
+    if (task) {
+      const newStatus = statusItem.dataset.status;
+      if (newStatus && newStatus !== task.status) {
+        taskManager.updateTask(task.id, { ...task, status: newStatus });
+      }
     }
     closeAllPopups();
     return;
@@ -356,13 +346,19 @@ document.addEventListener("click", (event) => {
     const title = card?.querySelector(".card-title")?.textContent?.trim();
 
     if (action === "edit") {
-      console.log("Editar tarea:", title);
+      const task = findTask(card?.dataset.taskId);
+      if (task && typeof window.openEditTaskModal === "function") {
+        window.openEditTaskModal(task);
+      }
     } else if (action === "tags") {
       const task = findTask(card?.dataset.taskId);
       const hasTags = task && Array.isArray(task.tags) && task.tags.length > 0;
       console.log(hasTags ? "Editar etiquetas:" : "Agregar etiquetas:", title);
     } else if (action === "delete") {
-      console.log("Eliminar tarea:", title);
+      const task = findTask(card?.dataset.taskId);
+      if (task) {
+        taskManager.deleteTask(task.id);
+      }
     }
 
     closeAllPopups();
@@ -372,6 +368,7 @@ document.addEventListener("click", (event) => {
   if (
     !event.target.closest(".assignee-picker") &&
     !event.target.closest(".due-date-picker") &&
+    !event.target.closest(".status-picker") &&
     !event.target.closest(".options-tooltip")
   ) {
     closeAllPopups();
