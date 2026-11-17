@@ -217,6 +217,24 @@ function positionPopup(popup, anchor) {
   popup.style.left = `${rect.left + window.scrollX}px`;
 }
 
+const POPUP_GAP = 6;
+
+function positionCategoryPicker(popup, anchor) {
+  const rect = anchor.getBoundingClientRect();
+  const popupHeight = popup.offsetHeight;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
+
+  const openAbove = spaceBelow < popupHeight + POPUP_GAP && spaceAbove >= spaceBelow;
+
+  if (openAbove) {
+    popup.style.top = `${rect.top + window.scrollY - popupHeight - POPUP_GAP}px`;
+  } else {
+    popup.style.top = `${rect.bottom + window.scrollY + POPUP_GAP}px`;
+  }
+  popup.style.left = `${rect.left + window.scrollX}px`;
+}
+
 function repositionActivePopups() {
   if (!assigneePicker.hidden && activeAssigneeAnchor) {
     positionPopup(assigneePicker, activeAssigneeAnchor);
@@ -228,7 +246,7 @@ function repositionActivePopups() {
     positionPopup(statusPicker, activeStatusAnchor);
   }
   if (!categoryPicker.hidden && activeCategoryAnchor) {
-    positionPopup(categoryPicker, activeCategoryAnchor);
+    positionCategoryPicker(categoryPicker, activeCategoryAnchor);
   }
 }
 
@@ -275,8 +293,8 @@ function openStatusPicker(anchor, task) {
 }
 
 function openCategoryPicker(anchor, task) {
-  positionPopup(categoryPicker, anchor);
   categoryPicker.hidden = false;
+  positionCategoryPicker(categoryPicker, anchor);
   activeCategoryTaskId = task.id;
   activeCategoryAnchor = anchor;
 }
