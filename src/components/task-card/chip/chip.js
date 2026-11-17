@@ -1,6 +1,7 @@
 const chipStatusClasses = {
   pending: "status-pending",
   "in-progress": "status-in-progress",
+  "in-review": "status-in-review",
   paused: "status-paused",
   blocked: "status-blocked",
   done: "status-done",
@@ -9,6 +10,7 @@ const chipStatusClasses = {
 const statusLabels = {
   pending: "Pendiente",
   "in-progress": "En progreso",
+  "in-review": "En revisión",
   blocked: "Bloqueado",
   paused: "En pausa",
   done: "Completada",
