@@ -47,7 +47,7 @@ function taskCardTemplate(card) {
   const dueDateHtml = dueDate
     ? `
         <div class="due-date">
-          <i class="ri-calendar-event-line"></i>
+          <i class="fa-solid fa-calendar-days"></i>
           <span>Fecha límite:</span>
           <span>${dueDate}</span>
         </div>`
