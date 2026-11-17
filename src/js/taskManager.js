@@ -1,9 +1,28 @@
+const STORAGE_KEY = "impulsus.tasks";
+
 class TaskManager {
 
   constructor() {
-    this.taskList = []
-    this.idTask = 0;
     this.listeners = new Set();
+    this.taskList = this.loadFromStorage();
+    this.idTask = this.taskList.reduce((max, task) => Math.max(max, Number(task.id) || 0), 0);
+  }
+
+  loadFromStorage() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      return Array.isArray(stored) ? stored : [];
+    } catch {
+      return [];
+    }
+  }
+
+  saveToStorage() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.taskList));
+    } catch {
+      console.error("No se pudieron guardar las tareas en localStorage");
+    }
   }
 
   getAllTasks() {
@@ -22,12 +41,14 @@ class TaskManager {
     this.idTask += 1;
     task.id = this.idTask;
     this.taskList.push(task);
+    this.saveToStorage();
     this.notify();
     return task;
   }
 
   deleteTask(taskId) {
     this.taskList = this.taskList.filter(task => String(task.id) !== String(taskId));
+    this.saveToStorage();
     this.notify();
   }
 
@@ -36,6 +57,7 @@ class TaskManager {
     if (task === -1) return;
     newTask.id = this.taskList[task].id;
     this.taskList[task] = newTask;
+    this.saveToStorage();
     this.notify();
   }
 
