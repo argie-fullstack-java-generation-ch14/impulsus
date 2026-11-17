@@ -2,7 +2,7 @@
   width: max-content;
   min-height: 0;
   display: grid;
-  grid-template-columns: repeat(5, 352px);
+  grid-template-columns: repeat(6, 352px);
   align-items: start;
   flex: 1;
   gap: 20px;
@@ -132,7 +132,7 @@
 
 @media (max-width: 768px) {
   .kanban-grid {
-    grid-template-columns: repeat(5, 352px);
+    grid-template-columns: repeat(6, 352px);
     width: max-content;
     gap: 16px;
   }

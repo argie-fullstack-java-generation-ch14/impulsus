@@ -1,6 +1,7 @@
 const taskColumnIds = [
   "taskColumnPending",
   "taskColumnInProgress",
+  "taskColumnInReview",
   "taskColumnBlocked",
   "taskColumnPaused",
   "taskColumnCompleted",
@@ -9,14 +10,11 @@ const taskColumnIds = [
 const columnStatusKeys = [
   "pending",
   "in-progress",
+  "in-review",
   "blocked",
   "paused",
   "done",
 ];
-
-function findTask(taskId) {
-  return taskManager.getAllTasks().find((task) => String(task.id) === String(taskId)) || null;
-}
 
 function taskCardTemplate(card) {
   const {
@@ -26,6 +24,7 @@ function taskCardTemplate(card) {
     assignee,
     dueDate,
     status,
+    category = null,
     tags = [],
     comments = 0,
   } = card;
@@ -49,7 +48,7 @@ function taskCardTemplate(card) {
   const dueDateHtml = dueDate
     ? `
         <div class="due-date">
-          <i class="ri-calendar-event-line"></i>
+          <i class="fa-solid fa-calendar-days"></i>
           <span>Fecha límite:</span>
           <span>${dueDate}</span>
         </div>`
@@ -85,8 +84,11 @@ function taskCardTemplate(card) {
         ${unassignSlotHtml}
         ${dueDateHtml}
         ${dueDateSlotHtml}
-        ${statusChipTemplate({ status, label: statusLabels[status] })}
         ${tagsRowTemplate(tags)}
+        <div class="card-meta-row">
+          ${statusChipTemplate({ status, label: statusLabels[status] })}
+          ${taskCategorySlotTemplate(category)}
+        </div>
         </div>
         </div>
         `;
@@ -147,6 +149,27 @@ statusPicker.innerHTML = columnStatusKeys
   .join("");
 document.body.appendChild(statusPicker);
 
+const categoryPicker = document.createElement("div");
+categoryPicker.className = "category-picker";
+categoryPicker.hidden = true;
+categoryPicker.innerHTML = `
+  <button type="button" class="category-picker__item" data-category="">
+    <span class="category-avatar category-avatar--empty"><i class="fa-solid fa-plus"></i></span>
+    <span>Sin categoría</span>
+  </button>
+  ${Object.entries(taskCategories)
+    .map(
+      ([categoryKey, category]) => `
+    <button type="button" class="category-picker__item" data-category="${categoryKey}">
+      ${taskCategoryAvatarTemplate(categoryKey)}
+      <span>${category.label}</span>
+      <span class="category-picker__tooltip">${category.description}</span>
+    </button>`
+    )
+    .join("")}
+`;
+document.body.appendChild(categoryPicker);
+
 const dueDateWrapper = document.createElement("div");
 dueDateWrapper.className = "due-date-picker";
 dueDateWrapper.hidden = true;
@@ -182,13 +205,33 @@ $(dueDateInput).datepicker({
 let activeAssigneeTaskId = null;
 let activeDueDateTaskId = null;
 let activeStatusTaskId = null;
+let activeCategoryTaskId = null;
 let activeAssigneeAnchor = null;
 let activeDueDateAnchor = null;
 let activeStatusAnchor = null;
+let activeCategoryAnchor = null;
 
 function positionPopup(popup, anchor) {
   const rect = anchor.getBoundingClientRect();
   popup.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  popup.style.left = `${rect.left + window.scrollX}px`;
+}
+
+const POPUP_GAP = 6;
+
+function positionCategoryPicker(popup, anchor) {
+  const rect = anchor.getBoundingClientRect();
+  const popupHeight = popup.offsetHeight;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
+
+  const openAbove = spaceBelow < popupHeight + POPUP_GAP && spaceAbove >= spaceBelow;
+
+  if (openAbove) {
+    popup.style.top = `${rect.top + window.scrollY - popupHeight - POPUP_GAP}px`;
+  } else {
+    popup.style.top = `${rect.bottom + window.scrollY + POPUP_GAP}px`;
+  }
   popup.style.left = `${rect.left + window.scrollX}px`;
 }
 
@@ -201,6 +244,9 @@ function repositionActivePopups() {
   }
   if (!statusPicker.hidden && activeStatusAnchor) {
     positionPopup(statusPicker, activeStatusAnchor);
+  }
+  if (!categoryPicker.hidden && activeCategoryAnchor) {
+    positionCategoryPicker(categoryPicker, activeCategoryAnchor);
   }
 }
 
@@ -226,6 +272,10 @@ function closeAllPopups() {
   statusPicker.hidden = true;
   activeStatusTaskId = null;
   activeStatusAnchor = null;
+
+  categoryPicker.hidden = true;
+  activeCategoryTaskId = null;
+  activeCategoryAnchor = null;
 }
 
 function openAssigneePicker(anchor, task) {
@@ -242,6 +292,13 @@ function openStatusPicker(anchor, task) {
   activeStatusAnchor = anchor;
 }
 
+function openCategoryPicker(anchor, task) {
+  categoryPicker.hidden = false;
+  positionCategoryPicker(categoryPicker, anchor);
+  activeCategoryTaskId = task.id;
+  activeCategoryAnchor = anchor;
+}
+
 function openDueDatepicker(anchor, task) {
   positionPopup(dueDateWrapper, anchor);
   dueDateWrapper.hidden = false;
@@ -253,7 +310,7 @@ function openDueDatepicker(anchor, task) {
 }
 
 $(dueDateInput).on("changeDate", (event) => {
-  const task = findTask(activeDueDateTaskId);
+  const task = taskManager.getTaskById(activeDueDateTaskId);
   if (task) {
     taskManager.updateTask(task.id, { ...task, dueDate: event.format() });
   }
@@ -261,7 +318,7 @@ $(dueDateInput).on("changeDate", (event) => {
 });
 
 clearDateBtn.addEventListener("click", () => {
-  const task = findTask(activeDueDateTaskId);
+  const task = taskManager.getTaskById(activeDueDateTaskId);
   if (task) {
     taskManager.updateTask(task.id, { ...task, dueDate: null });
   }
@@ -272,7 +329,7 @@ document.addEventListener("click", (event) => {
   const dueDateTarget = event.target.closest(".due-date-slot, .due-date");
   if (dueDateTarget) {
     const card = dueDateTarget.closest(".task-card");
-    const task = findTask(card?.dataset.taskId);
+    const task = taskManager.getTaskById(card?.dataset.taskId);
     if (!task) return;
     const wasOpen = !dueDateWrapper.hidden && activeDueDateTaskId === task.id;
     closeAllPopups();
@@ -283,7 +340,7 @@ document.addEventListener("click", (event) => {
   const assigneeTarget = event.target.closest(".unassign-slot, .avatar-group");
   if (assigneeTarget) {
     const card = assigneeTarget.closest(".task-card");
-    const task = findTask(card?.dataset.taskId);
+    const task = taskManager.getTaskById(card?.dataset.taskId);
     if (!task) return;
     const wasOpen = !assigneePicker.hidden && activeAssigneeTaskId === task.id;
     closeAllPopups();
@@ -293,7 +350,7 @@ document.addEventListener("click", (event) => {
 
   const pickerItem = event.target.closest(".assignee-picker__item");
   if (pickerItem) {
-    const task = findTask(activeAssigneeTaskId);
+    const task = taskManager.getTaskById(activeAssigneeTaskId);
     if (task) {
       const userIndex = Number(pickerItem.dataset.userIndex);
       const assignee = userIndex >= 0 ? team[userIndex] || null : null;
@@ -306,7 +363,7 @@ document.addEventListener("click", (event) => {
   const statusTarget = event.target.closest(".status-badge");
   if (statusTarget && !event.target.closest(".status-picker")) {
     const card = statusTarget.closest(".task-card");
-    const task = findTask(card?.dataset.taskId);
+    const task = taskManager.getTaskById(card?.dataset.taskId);
     if (!task) return;
     const wasOpen = !statusPicker.hidden && activeStatusTaskId === task.id;
     closeAllPopups();
@@ -316,7 +373,7 @@ document.addEventListener("click", (event) => {
 
   const statusItem = event.target.closest(".status-picker__item");
   if (statusItem) {
-    const task = findTask(activeStatusTaskId);
+    const task = taskManager.getTaskById(activeStatusTaskId);
     if (task) {
       const newStatus = statusItem.dataset.status;
       if (newStatus && newStatus !== task.status) {
@@ -324,6 +381,30 @@ document.addEventListener("click", (event) => {
       }
     }
     closeAllPopups();
+    return;
+  }
+
+  const categoryItem = event.target.closest(".category-picker__item");
+  if (categoryItem) {
+    const task = taskManager.getTaskById(activeCategoryTaskId);
+    if (task) {
+      const newCategory = categoryItem.dataset.category || null;
+      if (newCategory !== (task.category || null)) {
+        taskManager.updateTask(task.id, { ...task, category: newCategory });
+      }
+    }
+    closeAllPopups();
+    return;
+  }
+
+  const categoryTarget = event.target.closest(".category-avatar");
+  if (categoryTarget && !event.target.closest(".category-picker")) {
+    const card = categoryTarget.closest(".task-card");
+    const task = taskManager.getTaskById(card?.dataset.taskId);
+    if (!task) return;
+    const wasOpen = !categoryPicker.hidden && activeCategoryTaskId === task.id;
+    closeAllPopups();
+    if (!wasOpen) openCategoryPicker(categoryTarget, task);
     return;
   }
 
@@ -346,16 +427,16 @@ document.addEventListener("click", (event) => {
     const title = card?.querySelector(".card-title")?.textContent?.trim();
 
     if (action === "edit") {
-      const task = findTask(card?.dataset.taskId);
+      const task = taskManager.getTaskById(card?.dataset.taskId);
       if (task && typeof window.openEditTaskModal === "function") {
         window.openEditTaskModal(task);
       }
     } else if (action === "tags") {
-      const task = findTask(card?.dataset.taskId);
+      const task = taskManager.getTaskById(card?.dataset.taskId);
       const hasTags = task && Array.isArray(task.tags) && task.tags.length > 0;
       console.log(hasTags ? "Editar etiquetas:" : "Agregar etiquetas:", title);
     } else if (action === "delete") {
-      const task = findTask(card?.dataset.taskId);
+      const task = taskManager.getTaskById(card?.dataset.taskId);
       if (task) {
         taskManager.deleteTask(task.id);
       }
@@ -365,10 +446,23 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const cardTarget = event.target.closest(".task-card");
+  if (cardTarget) {
+    const task = taskManager.getTaskById(cardTarget.dataset.taskId);
+    if (task) {
+      closeAllPopups();
+      if (typeof window.openEditTaskModal === "function") {
+        window.openEditTaskModal(task);
+      }
+    }
+    return;
+  }
+
   if (
     !event.target.closest(".assignee-picker") &&
     !event.target.closest(".due-date-picker") &&
     !event.target.closest(".status-picker") &&
+    !event.target.closest(".category-picker") &&
     !event.target.closest(".options-tooltip")
   ) {
     closeAllPopups();

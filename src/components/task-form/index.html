@@ -39,6 +39,7 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="#" data-status="pending">Pendiente</a></li>
                 <li><a class="dropdown-item" href="#" data-status="in-progress">En progreso</a></li>
+                <li><a class="dropdown-item" href="#" data-status="in-review">En revisión</a></li>
                 <li><a class="dropdown-item" href="#" data-status="blocked">Bloqueado</a></li>
                 <li><a class="dropdown-item" href="#" data-status="paused">En pausa</a></li>
                 <li><a class="dropdown-item" href="#" data-status="done">Completado</a></li>
@@ -85,6 +86,29 @@
             <input type="text" class="form-control create-task-form__input" id="dueDate"
               placeholder="dd/mm/aaaa" autocomplete="off">
             <div class="form-feedback" id="dueDateFeedback">Ingresa una fecha límite.</div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+
+          <div class="col-12 col-md-6">
+            <label class="create-task-form__label">
+              Categoría
+            </label>
+
+            <div class="dropdown">
+
+              <button class="btn task-status w-100 justify-content-between dropdown-toggle" type="button"
+                id="taskCategoryToggle" data-category="" data-bs-toggle="dropdown" aria-expanded="false">
+                Sin categoría
+              </button>
+
+              <ul class="dropdown-menu dropdown-menu-end" id="taskCategoryMenu">
+                <li><a class="dropdown-item" href="#" data-category="">Sin categoría</a></li>
+              </ul>
+            </div>
+            <p class="category-hint" id="taskCategoryHint">Selecciona una categoría para clasificar la tarea.</p>
+            <div class="form-feedback" id="taskCategoryFeedback">Selecciona una categoría.</div>
           </div>
         </div>
 

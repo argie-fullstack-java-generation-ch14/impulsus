@@ -69,6 +69,13 @@
   gap: 10px;
 }
 
+.card-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .avatar-group {
   display: flex;
   align-items: center;

@@ -1,6 +1,7 @@
 (() => {
   let editingTaskId = null;
   const defaultStatus = "pending";
+  const defaultCategory = "";
   const assigneePlaceholderHtml = `
     <span class="assignee-select__placeholder">
       <i class="bi bi-person"></i>
@@ -23,6 +24,26 @@
     toggle.textContent = item.textContent.trim();
     toggle.dataset.status = statusKey;
     clearFieldError(toggle);
+  }
+
+  function setCategory(categoryKey) {
+    const modalEl = getModalEl();
+    if (!modalEl) return;
+
+    const item = modalEl.querySelector(`.dropdown-item[data-category="${categoryKey}"]`);
+    const toggle = modalEl.querySelector("#taskCategoryToggle");
+    if (!item || !toggle) return;
+
+    toggle.textContent = item.textContent.trim();
+    toggle.dataset.category = categoryKey;
+
+    const hint = modalEl.querySelector("#taskCategoryHint");
+    if (hint) {
+      const category = typeof taskCategories !== "undefined" ? taskCategories[categoryKey] : null;
+      hint.textContent = category
+        ? category.description
+        : "Selecciona una categoría para clasificar la tarea.";
+    }
   }
 
   function setAssignee(userIndex) {
@@ -75,6 +96,29 @@
     `;
   }
 
+  function buildCategoryMenu() {
+    const modalEl = getModalEl();
+    const menu = modalEl?.querySelector("#taskCategoryMenu");
+    if (!menu || typeof taskCategories === "undefined") return;
+
+    menu.innerHTML = `
+      <li><a class="dropdown-item" href="#" data-category="">Sin categoría</a></li>
+      ${Object.entries(taskCategories)
+        .map(
+          ([categoryKey, category]) => `
+        <li>
+          <a class="dropdown-item" href="#" data-category="${categoryKey}">
+            <span class="task-category-menu-item">
+              ${taskCategoryAvatarTemplate(categoryKey)}
+              <span>${category.label}</span>
+            </span>
+          </a>
+        </li>`
+        )
+        .join("")}
+    `;
+  }
+
   function openEditTaskModal(task) {
     const modalEl = getModalEl();
     if (!modalEl || !task) return;
@@ -95,6 +139,7 @@
     if (descInput) descInput.value = task.description || "";
 
     setStatus(task.status || defaultStatus);
+    setCategory(task.category || defaultCategory);
 
     let userIndex = -1;
     if (task.assignee && typeof team !== "undefined") {
@@ -160,6 +205,7 @@
       const title = modalEl.querySelector("#taskName")?.value.trim() || "";
       const description = modalEl.querySelector("#taskDescription")?.value.trim() || "";
       const status = modalEl.querySelector("#taskStatusToggle")?.dataset.status || defaultStatus;
+      const category = modalEl.querySelector("#taskCategoryToggle")?.dataset.category || null;
       const dueDate = modalEl.querySelector("#dueDate")?.value || null;
 
       const assigneeIndex = Number(modalEl.querySelector("#assigneeToggle")?.dataset.userIndex);
@@ -178,7 +224,8 @@
           description,
           assignee,
           dueDate,
-          status
+          status,
+          category
         );
         if (existingTask) {
           updatedTask.tags = existingTask.tags || [];
@@ -188,7 +235,7 @@
 
         console.log("Tarea actualizada:", updatedTask.getTask ? updatedTask.getTask() : updatedTask);
       } else {
-        const newTask = new Task(null, title, description, assignee, dueDate, status);
+        const newTask = new Task(null, title, description, assignee, dueDate, status, category);
         taskManager.addTask(newTask);
 
         console.log("Nueva tarea:", newTask.getTask());
@@ -201,12 +248,21 @@
 
 
     buildAssigneeMenu();
+    buildCategoryMenu();
 
     const assigneeMenu = modalEl.querySelector("#assigneeMenu");
     assigneeMenu?.addEventListener("click", (event) => {
       const item = event.target.closest(".assignee-picker__item");
       if (!item) return;
       setAssignee(item.dataset.userIndex);
+    });
+
+    const categoryMenu = modalEl.querySelector("#taskCategoryMenu");
+    categoryMenu?.addEventListener("click", (event) => {
+      const item = event.target.closest(".dropdown-item[data-category]");
+      if (!item) return;
+      event.preventDefault();
+      setCategory(item.dataset.category);
     });
 
     const dueDateInput = modalEl.querySelector("#dueDate");
@@ -247,6 +303,7 @@
 
       form?.reset();
       setStatus(defaultStatus);
+      setCategory(defaultCategory);
       setAssignee(-1);
       if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
         jQuery(dueDateInput).datepicker("update", "");
