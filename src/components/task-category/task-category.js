@@ -41,6 +41,12 @@ const taskCategories = {
     description:
       "Recompensas y compras no urgentes planificadas para disfrutar sin culpa.",
   },
+  "accion-transitoria": {
+    label: "Acción Transitoria",
+    icon: "fa-solid fa-bolt",
+    description:
+      "Tareas puntuales, diligencias o imprevistos del día a día que se resuelven una vez y liberan espacio mental.",
+  },
 };
 
 function taskCategoryAvatarTemplate(categoryKey) {
