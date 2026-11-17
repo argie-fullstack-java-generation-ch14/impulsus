@@ -88,6 +88,29 @@
     `;
   }
 
+  function buildCategoryMenu() {
+    const modalEl = getModalEl();
+    const menu = modalEl?.querySelector("#taskCategoryMenu");
+    if (!menu || typeof taskCategories === "undefined") return;
+
+    menu.innerHTML = `
+      <li><a class="dropdown-item" href="#" data-category="">Sin categoría</a></li>
+      ${Object.entries(taskCategories)
+        .map(
+          ([categoryKey, category]) => `
+        <li>
+          <a class="dropdown-item" href="#" data-category="${categoryKey}">
+            <span class="task-category-menu-item">
+              ${taskCategoryAvatarTemplate(categoryKey)}
+              <span>${category.label}</span>
+            </span>
+          </a>
+        </li>`
+        )
+        .join("")}
+    `;
+  }
+
   function openEditTaskModal(task) {
     const modalEl = getModalEl();
     if (!modalEl || !task) return;
@@ -166,13 +189,6 @@
       });
     });
 
-    modalEl.querySelectorAll(".dropdown-item[data-category]").forEach((item) => {
-      item.addEventListener("click", (event) => {
-        event.preventDefault();
-        setCategory(item.dataset.category);
-      });
-    });
-
     // paso 1 - task 3
     const form = modalEl.querySelector("#createTaskForm");
     form?.addEventListener("submit", (event) => {
@@ -224,12 +240,21 @@
 
 
     buildAssigneeMenu();
+    buildCategoryMenu();
 
     const assigneeMenu = modalEl.querySelector("#assigneeMenu");
     assigneeMenu?.addEventListener("click", (event) => {
       const item = event.target.closest(".assignee-picker__item");
       if (!item) return;
       setAssignee(item.dataset.userIndex);
+    });
+
+    const categoryMenu = modalEl.querySelector("#taskCategoryMenu");
+    categoryMenu?.addEventListener("click", (event) => {
+      const item = event.target.closest(".dropdown-item[data-category]");
+      if (!item) return;
+      event.preventDefault();
+      setCategory(item.dataset.category);
     });
 
     const dueDateInput = modalEl.querySelector("#dueDate");

@@ -66,6 +66,18 @@
   color: #94a3b8;
 }
 
+.task-category-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-item .category-avatar {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
 .category-picker {
   position: absolute;
   z-index: 40;
