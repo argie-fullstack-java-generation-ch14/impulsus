@@ -446,6 +446,18 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const cardTarget = event.target.closest(".task-card");
+  if (cardTarget) {
+    const task = taskManager.getTaskById(cardTarget.dataset.taskId);
+    if (task) {
+      closeAllPopups();
+      if (typeof window.openEditTaskModal === "function") {
+        window.openEditTaskModal(task);
+      }
+    }
+    return;
+  }
+
   if (
     !event.target.closest(".assignee-picker") &&
     !event.target.closest(".due-date-picker") &&
