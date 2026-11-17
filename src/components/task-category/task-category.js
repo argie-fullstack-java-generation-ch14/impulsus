@@ -57,8 +57,12 @@ function taskCategoryAvatarTemplate(categoryKey) {
 function taskCategorySlotTemplate(categoryKey) {
   if (!categoryKey || !taskCategories[categoryKey]) {
     return `
-      <span class="category-avatar category-avatar--empty" title="Sin categoría">
+      <span class="category-avatar category-avatar--empty">
         <i class="fa-solid fa-plus"></i>
+        <span class="category-card-tooltip">
+          <span class="category-card-tooltip__name">Sin categoría</span>
+          <span class="category-card-tooltip__desc">Haz clic para asignar una categoría.</span>
+        </span>
       </span>
     `;
   }
