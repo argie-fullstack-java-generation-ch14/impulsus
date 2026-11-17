@@ -14,6 +14,10 @@ class TaskManager {
     return this.taskList.filter(task => task.status === status)
   }
 
+  getTaskById(taskId) {
+    return this.taskList.find(task => String(task.id) === String(taskId)) || null;
+  }
+
   addTask(task) {
     this.idTask += 1;
     task.id = this.idTask;

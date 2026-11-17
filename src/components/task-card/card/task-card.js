@@ -1,6 +1,7 @@
 const taskColumnIds = [
   "taskColumnPending",
   "taskColumnInProgress",
+  "taskColumnInReview",
   "taskColumnBlocked",
   "taskColumnPaused",
   "taskColumnCompleted",
@@ -9,14 +10,11 @@ const taskColumnIds = [
 const columnStatusKeys = [
   "pending",
   "in-progress",
+  "in-review",
   "blocked",
   "paused",
   "done",
 ];
-
-function findTask(taskId) {
-  return taskManager.getAllTasks().find((task) => String(task.id) === String(taskId)) || null;
-}
 
 function taskCardTemplate(card) {
   const {
@@ -253,7 +251,7 @@ function openDueDatepicker(anchor, task) {
 }
 
 $(dueDateInput).on("changeDate", (event) => {
-  const task = findTask(activeDueDateTaskId);
+  const task = taskManager.getTaskById(activeDueDateTaskId);
   if (task) {
     taskManager.updateTask(task.id, { ...task, dueDate: event.format() });
   }
@@ -261,7 +259,7 @@ $(dueDateInput).on("changeDate", (event) => {
 });
 
 clearDateBtn.addEventListener("click", () => {
-  const task = findTask(activeDueDateTaskId);
+  const task = taskManager.getTaskById(activeDueDateTaskId);
   if (task) {
     taskManager.updateTask(task.id, { ...task, dueDate: null });
   }
@@ -272,7 +270,7 @@ document.addEventListener("click", (event) => {
   const dueDateTarget = event.target.closest(".due-date-slot, .due-date");
   if (dueDateTarget) {
     const card = dueDateTarget.closest(".task-card");
-    const task = findTask(card?.dataset.taskId);
+    const task = taskManager.getTaskById(card?.dataset.taskId);
     if (!task) return;
     const wasOpen = !dueDateWrapper.hidden && activeDueDateTaskId === task.id;
     closeAllPopups();
@@ -283,7 +281,7 @@ document.addEventListener("click", (event) => {
   const assigneeTarget = event.target.closest(".unassign-slot, .avatar-group");
   if (assigneeTarget) {
     const card = assigneeTarget.closest(".task-card");
-    const task = findTask(card?.dataset.taskId);
+    const task = taskManager.getTaskById(card?.dataset.taskId);
     if (!task) return;
     const wasOpen = !assigneePicker.hidden && activeAssigneeTaskId === task.id;
     closeAllPopups();
@@ -293,7 +291,7 @@ document.addEventListener("click", (event) => {
 
   const pickerItem = event.target.closest(".assignee-picker__item");
   if (pickerItem) {
-    const task = findTask(activeAssigneeTaskId);
+    const task = taskManager.getTaskById(activeAssigneeTaskId);
     if (task) {
       const userIndex = Number(pickerItem.dataset.userIndex);
       const assignee = userIndex >= 0 ? team[userIndex] || null : null;
@@ -306,7 +304,7 @@ document.addEventListener("click", (event) => {
   const statusTarget = event.target.closest(".status-badge");
   if (statusTarget && !event.target.closest(".status-picker")) {
     const card = statusTarget.closest(".task-card");
-    const task = findTask(card?.dataset.taskId);
+    const task = taskManager.getTaskById(card?.dataset.taskId);
     if (!task) return;
     const wasOpen = !statusPicker.hidden && activeStatusTaskId === task.id;
     closeAllPopups();
@@ -316,7 +314,7 @@ document.addEventListener("click", (event) => {
 
   const statusItem = event.target.closest(".status-picker__item");
   if (statusItem) {
-    const task = findTask(activeStatusTaskId);
+    const task = taskManager.getTaskById(activeStatusTaskId);
     if (task) {
       const newStatus = statusItem.dataset.status;
       if (newStatus && newStatus !== task.status) {
@@ -346,16 +344,16 @@ document.addEventListener("click", (event) => {
     const title = card?.querySelector(".card-title")?.textContent?.trim();
 
     if (action === "edit") {
-      const task = findTask(card?.dataset.taskId);
+      const task = taskManager.getTaskById(card?.dataset.taskId);
       if (task && typeof window.openEditTaskModal === "function") {
         window.openEditTaskModal(task);
       }
     } else if (action === "tags") {
-      const task = findTask(card?.dataset.taskId);
+      const task = taskManager.getTaskById(card?.dataset.taskId);
       const hasTags = task && Array.isArray(task.tags) && task.tags.length > 0;
       console.log(hasTags ? "Editar etiquetas:" : "Agregar etiquetas:", title);
     } else if (action === "delete") {
-      const task = findTask(card?.dataset.taskId);
+      const task = taskManager.getTaskById(card?.dataset.taskId);
       if (task) {
         taskManager.deleteTask(task.id);
       }
