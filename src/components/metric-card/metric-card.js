@@ -9,6 +9,11 @@ function getMetricsData() {
       ? taskManager.getTasksWithStatus("in-progress").length
       : 0;
 
+  const inReviewCount =
+    typeof taskManager !== "undefined"
+      ? taskManager.getTasksWithStatus("in-review").length
+      : 0;
+
   const completedCount =
     typeof taskManager !== "undefined"
       ? taskManager.getTasksWithStatus("done").length
@@ -17,6 +22,7 @@ function getMetricsData() {
   return [
     { icon: "fa-solid fa-chart-line", title: "To Do", value: pendingCount },
     { icon: "fa-solid fa-chart-line", title: "En Progreso", value: inProgressCount },
+    { icon: "fa-solid fa-chart-line", title: "En Revisión", value: inReviewCount },
     { icon: "fa-solid fa-chart-line", title: "Completado", value: completedCount },
   ];
 }
