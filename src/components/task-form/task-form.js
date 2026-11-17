@@ -36,6 +36,14 @@
 
     toggle.textContent = item.textContent.trim();
     toggle.dataset.category = categoryKey;
+
+    const hint = modalEl.querySelector("#taskCategoryHint");
+    if (hint) {
+      const category = typeof taskCategories !== "undefined" ? taskCategories[categoryKey] : null;
+      hint.textContent = category
+        ? category.description
+        : "Selecciona una categoría para clasificar la tarea.";
+    }
   }
 
   function setAssignee(userIndex) {
