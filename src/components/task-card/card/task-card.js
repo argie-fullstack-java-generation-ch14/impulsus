@@ -24,6 +24,7 @@ function taskCardTemplate(card) {
     assignee,
     dueDate,
     status,
+    category = null,
     tags = [],
     comments = 0,
   } = card;
@@ -83,8 +84,11 @@ function taskCardTemplate(card) {
         ${unassignSlotHtml}
         ${dueDateHtml}
         ${dueDateSlotHtml}
-        ${statusChipTemplate({ status, label: statusLabels[status] })}
         ${tagsRowTemplate(tags)}
+        <div class="card-meta-row">
+          ${statusChipTemplate({ status, label: statusLabels[status] })}
+          ${taskCategorySlotTemplate(category)}
+        </div>
         </div>
         </div>
         `;
@@ -145,6 +149,27 @@ statusPicker.innerHTML = columnStatusKeys
   .join("");
 document.body.appendChild(statusPicker);
 
+const categoryPicker = document.createElement("div");
+categoryPicker.className = "category-picker";
+categoryPicker.hidden = true;
+categoryPicker.innerHTML = `
+  <button type="button" class="category-picker__item" data-category="">
+    <span class="category-avatar category-avatar--empty"><i class="fa-solid fa-plus"></i></span>
+    <span>Sin categoría</span>
+  </button>
+  ${Object.entries(taskCategories)
+    .map(
+      ([categoryKey, category]) => `
+    <button type="button" class="category-picker__item" data-category="${categoryKey}">
+      ${taskCategoryAvatarTemplate(categoryKey)}
+      <span>${category.label}</span>
+      <span class="category-picker__tooltip">${category.description}</span>
+    </button>`
+    )
+    .join("")}
+`;
+document.body.appendChild(categoryPicker);
+
 const dueDateWrapper = document.createElement("div");
 dueDateWrapper.className = "due-date-picker";
 dueDateWrapper.hidden = true;
@@ -180,9 +205,11 @@ $(dueDateInput).datepicker({
 let activeAssigneeTaskId = null;
 let activeDueDateTaskId = null;
 let activeStatusTaskId = null;
+let activeCategoryTaskId = null;
 let activeAssigneeAnchor = null;
 let activeDueDateAnchor = null;
 let activeStatusAnchor = null;
+let activeCategoryAnchor = null;
 
 function positionPopup(popup, anchor) {
   const rect = anchor.getBoundingClientRect();
@@ -199,6 +226,9 @@ function repositionActivePopups() {
   }
   if (!statusPicker.hidden && activeStatusAnchor) {
     positionPopup(statusPicker, activeStatusAnchor);
+  }
+  if (!categoryPicker.hidden && activeCategoryAnchor) {
+    positionPopup(categoryPicker, activeCategoryAnchor);
   }
 }
 
@@ -224,6 +254,10 @@ function closeAllPopups() {
   statusPicker.hidden = true;
   activeStatusTaskId = null;
   activeStatusAnchor = null;
+
+  categoryPicker.hidden = true;
+  activeCategoryTaskId = null;
+  activeCategoryAnchor = null;
 }
 
 function openAssigneePicker(anchor, task) {
@@ -238,6 +272,13 @@ function openStatusPicker(anchor, task) {
   statusPicker.hidden = false;
   activeStatusTaskId = task.id;
   activeStatusAnchor = anchor;
+}
+
+function openCategoryPicker(anchor, task) {
+  positionPopup(categoryPicker, anchor);
+  categoryPicker.hidden = false;
+  activeCategoryTaskId = task.id;
+  activeCategoryAnchor = anchor;
 }
 
 function openDueDatepicker(anchor, task) {
@@ -325,6 +366,30 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const categoryItem = event.target.closest(".category-picker__item");
+  if (categoryItem) {
+    const task = taskManager.getTaskById(activeCategoryTaskId);
+    if (task) {
+      const newCategory = categoryItem.dataset.category || null;
+      if (newCategory !== (task.category || null)) {
+        taskManager.updateTask(task.id, { ...task, category: newCategory });
+      }
+    }
+    closeAllPopups();
+    return;
+  }
+
+  const categoryTarget = event.target.closest(".category-avatar");
+  if (categoryTarget && !event.target.closest(".category-picker")) {
+    const card = categoryTarget.closest(".task-card");
+    const task = taskManager.getTaskById(card?.dataset.taskId);
+    if (!task) return;
+    const wasOpen = !categoryPicker.hidden && activeCategoryTaskId === task.id;
+    closeAllPopups();
+    if (!wasOpen) openCategoryPicker(categoryTarget, task);
+    return;
+  }
+
   const optionsBtn = event.target.closest(".options-btn");
   if (optionsBtn) {
     const tooltip = optionsBtn.parentElement.querySelector(".options-tooltip");
@@ -367,6 +432,7 @@ document.addEventListener("click", (event) => {
     !event.target.closest(".assignee-picker") &&
     !event.target.closest(".due-date-picker") &&
     !event.target.closest(".status-picker") &&
+    !event.target.closest(".category-picker") &&
     !event.target.closest(".options-tooltip")
   ) {
     closeAllPopups();

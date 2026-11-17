@@ -1,0 +1,203 @@
+.category-avatar {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.category-card-tooltip {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 8px);
+  transform: translateY(-50%);
+  width: 240px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background-color: #1e293b;
+  color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  pointer-events: none;
+  white-space: normal;
+  text-align: left;
+  cursor: default;
+  z-index: 50;
+}
+
+.category-avatar:hover .category-card-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.category-card-tooltip__title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.category-card-tooltip__name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.category-card-tooltip__desc {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+.category-avatar--empty {
+  border: 1px dashed #cbd5e1;
+  background-color: #f8fafc;
+  color: #94a3b8;
+}
+
+.category-picker {
+  position: absolute;
+  z-index: 40;
+  min-width: 220px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.category-picker[hidden] {
+  display: none;
+}
+
+.category-picker__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.category-picker__item:hover {
+  background-color: #f1f5f9;
+}
+
+.category-picker__item .category-avatar {
+  pointer-events: none;
+}
+
+.category-picker__tooltip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px);
+  transform: translateY(-50%);
+  width: 240px;
+  padding: 8px 10px;
+  background-color: #1e293b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: left;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  pointer-events: none;
+  white-space: normal;
+  z-index: 50;
+}
+
+.category-picker__item:hover .category-picker__tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.category-habito-mentalidad {
+  color: #15803d;
+  background-color: rgba(34, 197, 94, 0.14);
+}
+
+.category-maestria-carrera {
+  color: #4338ca;
+  background-color: rgba(99, 102, 241, 0.14);
+}
+
+.category-vitalidad-cuerpo {
+  color: #b91c1c;
+  background-color: rgba(239, 68, 68, 0.14);
+}
+
+.category-hitos-vida {
+  color: #b45309;
+  background-color: rgba(245, 158, 11, 0.14);
+}
+
+.category-necesidades-inversion {
+  color: #0f766e;
+  background-color: rgba(20, 184, 166, 0.14);
+}
+
+.category-esparcimiento-hobbies {
+  color: #c2410c;
+  background-color: rgba(249, 115, 22, 0.14);
+}
+
+.category-deseos-gustos {
+  color: #be185d;
+  background-color: rgba(236, 72, 153, 0.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  .category-habito-mentalidad {
+    color: #4ade80;
+  }
+
+  .category-maestria-carrera {
+    color: #818cf8;
+  }
+
+  .category-vitalidad-cuerpo {
+    color: #f87171;
+  }
+
+  .category-hitos-vida {
+    color: #fbbf24;
+  }
+
+  .category-necesidades-inversion {
+    color: #2dd4bf;
+  }
+
+  .category-esparcimiento-hobbies {
+    color: #fb923c;
+  }
+
+  .category-deseos-gustos {
+    color: #f472b6;
+  }
+}
