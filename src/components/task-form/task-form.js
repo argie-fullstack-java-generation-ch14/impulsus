@@ -1,6 +1,7 @@
 (() => {
   let editingTaskId = null;
   const defaultStatus = "pending";
+  const defaultCategory = "";
   const assigneePlaceholderHtml = `
     <span class="assignee-select__placeholder">
       <i class="bi bi-person"></i>
@@ -23,6 +24,18 @@
     toggle.textContent = item.textContent.trim();
     toggle.dataset.status = statusKey;
     clearFieldError(toggle);
+  }
+
+  function setCategory(categoryKey) {
+    const modalEl = getModalEl();
+    if (!modalEl) return;
+
+    const item = modalEl.querySelector(`.dropdown-item[data-category="${categoryKey}"]`);
+    const toggle = modalEl.querySelector("#taskCategoryToggle");
+    if (!item || !toggle) return;
+
+    toggle.textContent = item.textContent.trim();
+    toggle.dataset.category = categoryKey;
   }
 
   function setAssignee(userIndex) {
@@ -95,6 +108,7 @@
     if (descInput) descInput.value = task.description || "";
 
     setStatus(task.status || defaultStatus);
+    setCategory(task.category || defaultCategory);
 
     let userIndex = -1;
     if (task.assignee && typeof team !== "undefined") {
@@ -152,6 +166,13 @@
       });
     });
 
+    modalEl.querySelectorAll(".dropdown-item[data-category]").forEach((item) => {
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        setCategory(item.dataset.category);
+      });
+    });
+
     // paso 1 - task 3
     const form = modalEl.querySelector("#createTaskForm");
     form?.addEventListener("submit", (event) => {
@@ -160,6 +181,7 @@
       const title = modalEl.querySelector("#taskName")?.value.trim() || "";
       const description = modalEl.querySelector("#taskDescription")?.value.trim() || "";
       const status = modalEl.querySelector("#taskStatusToggle")?.dataset.status || defaultStatus;
+      const category = modalEl.querySelector("#taskCategoryToggle")?.dataset.category || null;
       const dueDate = modalEl.querySelector("#dueDate")?.value || null;
 
       const assigneeIndex = Number(modalEl.querySelector("#assigneeToggle")?.dataset.userIndex);
@@ -178,7 +200,8 @@
           description,
           assignee,
           dueDate,
-          status
+          status,
+          category
         );
         if (existingTask) {
           updatedTask.tags = existingTask.tags || [];
@@ -188,7 +211,7 @@
 
         console.log("Tarea actualizada:", updatedTask.getTask ? updatedTask.getTask() : updatedTask);
       } else {
-        const newTask = new Task(null, title, description, assignee, dueDate, status);
+        const newTask = new Task(null, title, description, assignee, dueDate, status, category);
         taskManager.addTask(newTask);
 
         console.log("Nueva tarea:", newTask.getTask());
@@ -247,6 +270,7 @@
 
       form?.reset();
       setStatus(defaultStatus);
+      setCategory(defaultCategory);
       setAssignee(-1);
       if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
         jQuery(dueDateInput).datepicker("update", "");
