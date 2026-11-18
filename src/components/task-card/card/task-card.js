@@ -95,7 +95,6 @@ function taskCardTemplate(card) {
         ${unassignSlotHtml}
         ${dueDateHtml}
         ${dueDateSlotHtml}
-        ${tagsRowTemplate(tags)}
         <div class="card-meta-row">
           ${statusChipTemplate({ status, label: statusLabels[status] })}
           <div class="card-meta-right">
@@ -107,6 +106,8 @@ function taskCardTemplate(card) {
         </div>
         `;
   // ${commentsCountTemplate(comments)}
+  // ${tagsRowTemplate(tags)}
+
 }
 
 function renderTaskCards() {
