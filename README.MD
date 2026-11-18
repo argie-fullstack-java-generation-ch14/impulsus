@@ -11,7 +11,7 @@
 
 El nombre **Impulsus** proviene del latín (*empuje, estímulo, fuerza en movimiento*).Su propósito es visibilizar cada paso y tarea pequeña, permitiendo llevarla a la acción de forma inmediata y sin distracciones, mantener el control del progreso y transformar cada avance completado en un catalizador de inercia positiva.
 
-Esta visión toma forma a partir de la filosofía del libro *El Efecto Compuesto*, partiendo de su premisa central: los resultados a largo plazo son el producto directo de una ecuación silenciosa donde las micro-decisiones cotidianas —aunque parezcan imperceptibles al principio, justo en el punto donde la mayoría abandona— generan con constancia una curva de crecimiento exponencial.
+Esta visión toma forma a partir de la filosofía de uno de mis libros favoritos: *El Efecto Compuesto*. Partiendo de su premisa central, los resultados a largo plazo son el producto directo de una ecuación silenciosa donde las micro-decisiones cotidianas —aunque parezcan imperceptibles al principio, justo en el punto donde la mayoría abandona— generan con constancia una curva de crecimiento exponencial.
 
 A partir de esta idea, la experiencia y el diseño de **Impulsus** se sostienen sobre **cuatro pilares fundamentales**:
 
@@ -55,11 +55,15 @@ Bajo la premisa del *Efecto Compuesto*, cada pequeña decisión construye un res
 
 ---
 
-## 🧩 Arquitectura Reactiva
+## ⚙️ Estrategias Técnicas del Proyecto
+
+Sin framework ni backend, Impulsus tuvo que resolver a mano varios problemas que en otros proyectos resuelven las librerías. Estas son las estrategias adoptadas, qué problema resuelve cada una y dónde están en el código. La primera es la reactividad de la board y el arranque diferido; las siguientes, el reuso de markup, las rutas y la confiabilidad de los datos persistidos.
+
+### 1. Arquitectura reactiva
 
 La board se mantiene sincronizada con los datos gracias a dos "observadores" con roles distintos.
 
-### TaskManager: `subscribe()` y `notify()` (patrón Observer)
+#### TaskManager: `subscribe()` y `notify()` (patrón Observer)
 
 `src/js/taskManager.js` implementa el patrón **Observer** para que la UI reaccione a los cambios de datos sin que nadie la llame manualmente:
 
@@ -88,7 +92,7 @@ const unsubscribe = taskManager.subscribe(renderTaskCards);
 unsubscribe();
 ```
 
-### MutationObserver (API nativa del navegador)
+#### MutationObserver (API nativa del navegador)
 
 `MutationObserver` observa cambios en el **DOM** (elementos añadidos/quitados, atributos, texto). En este proyecto se usa como espera del bootstrapping: los componentes se inyectan con `fetch` (asíncrono), así que cuando `task-card.js` se ejecuta todavía **no existen** los `<div id="taskColumnPending">...` donde irían las cards.
 
@@ -105,7 +109,7 @@ if (!renderTaskCards()) {
 - `{ childList: true, subtree: true }`: avísame si en cualquier punto del `body` entran/salen nodos.
 - Cada vez que `renderPartial` inyecta los partials, el callback reintenta; cuando el render finalmente pinta, `observer.disconnect()` lo apaga.
 
-### ¿Quién hace qué?
+#### ¿Quién hace qué?
 
 | Observador | Observa | Vida útil | Rol |
 |---|---|---|---|
@@ -114,13 +118,7 @@ if (!renderTaskCards()) {
 
 > ⚠️ Un `MutationObserver` no puede vigilar un array de JavaScript: solo ve el DOM. Por eso la reactividad de datos vive en el TaskManager.
 
----
-
-## ⚙️ Estrategias Técnicas del Proyecto
-
-Sin framework ni backend, Impulsus tuvo que resolver a mano varios problemas que en otros proyectos resuelven las librerías. Estas son las estrategias adoptadas, qué problema resuelve cada una y dónde están en el código. La reactividad de datos (`subscribe`/`notify`) y el arranque diferido con `MutationObserver` ya se explican en **Arquitectura Reactiva**; aquí se cubren las demás.
-
-### 1. Componentes reutilizables sin framework
+### 2. Componentes reutilizables sin framework
 
 El proyecto no usa ningún framework de front-end. Para no repetir código, imita dos patrones de componentes reutilizables.
 
@@ -152,7 +150,7 @@ El patrón no es invento de ningún framework moderno: es tan viejo como el `inc
 
 La diferencia es **quién hace el include**: en PHP, Rails, Blade o Twig lo hace el servidor antes de enviar la página; Impulsus no tiene servidor, así que lo hace el navegador con `fetch()`.
 
-A diferencia de otros setups, `renderPartial` no inyecta CSS ni `<script>`: los estilos y scripts de los componentes se declaran una sola vez en `index.html:23-37` y `index.html:70-92`. Lo que sí hace es reescribir las rutas relativas del fragmento (`resolveLinks`, `ui.js:17-29`), y los componentes con comportamiento propio se enlazan cuando su markup ya existe, esperándolo con `MutationObserver` (ver **Arquitectura Reactiva**).
+A diferencia de otros setups, `renderPartial` no inyecta CSS ni `<script>`: los estilos y scripts de los componentes se declaran una sola vez en `index.html:23-37` y `index.html:70-92`. Lo que sí hace es reescribir las rutas relativas del fragmento (`resolveLinks`, `ui.js:17-29`), y los componentes con comportamiento propio se enlazan cuando su markup ya existe, esperándolo con `MutationObserver` (ver **Arquitectura reactiva**, estrategia 1).
 
 ⚠️ Como usa `fetch()`, el sitio **debe servirse por HTTP**; abrirlo con `file://` deja los contenedores vacíos.
 
@@ -183,7 +181,7 @@ tasks.map(taskCardTemplate).join("")
 | `fetch()` + HTML externo | Markup compartido y estático (sidebar, header, columnas, modal de tarea) | `src/components/` con `index.html`, inyectado desde `src/js/ui.js` |
 | Template strings | HTML que depende de datos (cards, chips, métricas, comentarios) | `src/components/` con `.js`, pintado por quien consume el dato |
 
-### 2. Rutas ancladas al script, no a la página
+### 3. Rutas ancladas al script, no a la página
 
 Los partials se piden con `fetch()` y los enlaces se escriben una sola vez, relativos a la carpeta del script. Si cada script resolviera sus rutas contra la página actual (`location.href`), el resultado cambiaría según desde dónde se sirva la app.
 
@@ -198,7 +196,7 @@ const componentsBase = new URL("components/", appBase).href;      // src/compone
 
 > Nota: el proyecto no usa módulos ES, así que no hay `import.meta.url`. Todos los scripts son clásicos y se cargan en orden desde `index.html`; si se migrara a módulos, el mismo principio se aplica con `import.meta.url`.
 
-### 3. Una sola fuente de verdad: el singleton `taskManager`
+### 4. Una sola fuente de verdad: el singleton `taskManager`
 
 Los datos no viven en cada componente: existe **una única instancia** de `TaskManager`, creada en `src/js/app.js:1` y expuesta en `window.taskManager` solo para depurar (`app.js:4`):
 
@@ -207,11 +205,11 @@ const taskManager = new TaskManager();
 window.taskManager = taskManager;
 ```
 
-Todos los componentes leen y mutan a través de esa instancia (`getTasksWithStatus`, `addTask`, `updateTask`, `addComment`...), y nadie fuera de `TaskManager` toca `localStorage`. La persistencia y el repintado quedan centralizados: cada mutación guarda y llama a `notify()` (ver **Arquitectura Reactiva**).
+Todos los componentes leen y mutan a través de esa instancia (`getTasksWithStatus`, `addTask`, `updateTask`, `addComment`...), y nadie fuera de `TaskManager` toca `localStorage`. La persistencia y el repintado quedan centralizados: cada mutación guarda y llama a `notify()` (ver **Arquitectura reactiva**, estrategia 1).
 
 Esto también resuelve el orden de carga: `index.html:70-74` carga `users.js`, `task.js`, `taskManager.js`, `ui.js` y `app.js` antes que los componentes (`index.html:75-92`). Como la instancia es global y síncrona, ningún componente necesita un event bus ni esperar un evento para saber que el `taskManager` existe.
 
-### 4. localStorage como entrada no confiable
+### 5. localStorage como entrada no confiable
 
 Las tareas viven en `localStorage` bajo la clave `impulsus.tasks` (`taskManager.js:1`), que es texto editable por cualquiera: el usuario, otra pestaña, una extensión. Tratarlo como fuente confiable rompería la app con un JSON corrupto.
 
