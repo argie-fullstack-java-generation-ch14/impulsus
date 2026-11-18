@@ -1,6 +1,6 @@
 const taskCategories = {
   "habito-mentalidad": {
-    label: "Hábito y Mentalidad",
+    label: "Hábitos y Mentalidades",
     icon: "fa-solid fa-seedling",
     description:
       "Rutinas ancla y entrenamiento mental diario que construyen disciplina a través de pequeñas acciones constantes.",
