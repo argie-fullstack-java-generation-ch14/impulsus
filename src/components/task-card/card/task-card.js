@@ -26,8 +26,19 @@ function taskCardTemplate(card) {
     status,
     category = null,
     tags = [],
-    comments = 0,
+    comments = [],
   } = card;
+
+  const commentsCount = Array.isArray(comments) ? comments.length : 0;
+  const commentsLabel = `${commentsCount} ${commentsCount === 1 ? "comentario" : "comentarios"}`;
+  const commentsCountHtml =
+    commentsCount > 0
+      ? `
+            <div class="card-comments-count">
+              <i class="fa-regular fa-message"></i>
+              <span>${commentsLabel}</span>
+            </div>`
+      : "";
 
   const assigneeHtml = assignee
     ? `
@@ -84,15 +95,18 @@ function taskCardTemplate(card) {
         ${unassignSlotHtml}
         ${dueDateHtml}
         ${dueDateSlotHtml}
-        ${tagsRowTemplate(tags)}
         <div class="card-meta-row">
           ${statusChipTemplate({ status, label: statusLabels[status] })}
-          ${taskCategorySlotTemplate(category)}
+          <div class="card-meta-right">
+            ${commentsCountHtml}
+            ${taskCategorySlotTemplate(category)}
+          </div>
         </div>
         </div>
         </div>
         `;
-  // ${commentsCountTemplate(comments)}
+  // ${tagsRowTemplate(tags)}
+
 }
 
 function renderTaskCards() {

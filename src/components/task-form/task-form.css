@@ -1,13 +1,24 @@
 .create-task-card {
-  padding: 24px 28px;
+  padding: 0;
   background: #ffffff;
   border-radius: 20px;
   border: none;
   box-shadow: none;
+  overflow: hidden;
 }
 
 #taskFormModal .modal-dialog {
-  max-width: 650px;
+  max-width: 1060px;
+}
+
+.create-task-card__left {
+  padding: 24px 28px;
+}
+
+@media (max-width: 991.98px) {
+  .create-task-card__left {
+    padding: 20px 20px 12px;
+  }
 }
 
 .create-task-card__header-btn {
@@ -49,6 +60,26 @@
 .task-status:focus {
   background-color: #eef2ff;
   color: var(--primary-blue-hover);
+}
+
+.category-select__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.category-select__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-status .category-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: inherit;
 }
 
 .create-task-card .dropdown-item {

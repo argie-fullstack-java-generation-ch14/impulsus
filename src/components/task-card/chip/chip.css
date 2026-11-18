@@ -77,11 +77,11 @@
   background-color: #16a34a;
 }
 
-.tags-row {
+/* .tags-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
+} */
 
 .tag {
   padding: 4px 10px;
