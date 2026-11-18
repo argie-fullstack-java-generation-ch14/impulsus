@@ -26,15 +26,30 @@
     clearFieldError(toggle);
   }
 
+  function categoryToggleHtml(categoryKey) {
+    const category =
+      typeof taskCategories !== "undefined" ? taskCategories[categoryKey] : null;
+
+    if (!category) return "Sin categoría";
+
+    return `
+      <span class="category-select__value">
+        <span class="category-avatar category-${categoryKey}">
+          <i class="${category.icon}"></i>
+        </span>
+        <span class="category-select__label">${category.label}</span>
+      </span>
+    `;
+  }
+
   function setCategory(categoryKey) {
     const modalEl = getModalEl();
     if (!modalEl) return;
 
-    const item = modalEl.querySelector(`.dropdown-item[data-category="${categoryKey}"]`);
     const toggle = modalEl.querySelector("#taskCategoryToggle");
-    if (!item || !toggle) return;
+    if (!toggle) return;
 
-    toggle.textContent = item.textContent.trim();
+    toggle.innerHTML = categoryToggleHtml(categoryKey);
     toggle.dataset.category = categoryKey;
 
     const hint = modalEl.querySelector("#taskCategoryHint");

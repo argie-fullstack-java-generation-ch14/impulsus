@@ -62,6 +62,26 @@
   color: var(--primary-blue-hover);
 }
 
+.category-select__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.category-select__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-status .category-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: inherit;
+}
+
 .create-task-card .dropdown-item {
   font-size: 14px;
 }
