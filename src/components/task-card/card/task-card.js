@@ -35,7 +35,7 @@ function taskCardTemplate(card) {
     commentsCount > 0
       ? `
             <div class="card-comments-count">
-              <i class="fa-solid fa-comment"></i>
+              <i class="fa-regular fa-message"></i>
               <span>${commentsLabel}</span>
             </div>`
       : "";
@@ -105,7 +105,6 @@ function taskCardTemplate(card) {
         </div>
         </div>
         `;
-  // ${commentsCountTemplate(comments)}
   // ${tagsRowTemplate(tags)}
 
 }
