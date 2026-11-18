@@ -86,6 +86,11 @@
   font-size: 14px;
 }
 
+#taskCategoryMenu .dropdown-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
 .create-task-form__description {
   border: 1px solid var(--input-border);
   border-radius: 10px;

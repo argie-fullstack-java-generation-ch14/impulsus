@@ -118,6 +118,7 @@
 
     menu.innerHTML = `
       <li><a class="dropdown-item" href="#" data-category="">Sin categoría</a></li>
+      <li><div class="assignee-picker__divider" role="separator"></div></li>
       ${Object.entries(taskCategories)
         .map(
           ([categoryKey, category]) => `
