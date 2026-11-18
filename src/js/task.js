@@ -1,6 +1,6 @@
 class Task {
 
-  constructor(id, title, description, assignee, dueDate, status, category = null) {
+  constructor(id, title, description, assignee, dueDate, status, category = null, comments = []) {
     this.id = id;
     this.title = title;
     this.description = description;
@@ -8,6 +8,7 @@ class Task {
     this.dueDate = dueDate;
     this.status = status;
     this.category = category;
+    this.comments = comments;
   }
 
   getTask() {
@@ -19,6 +20,7 @@ class Task {
       dueDate: this.dueDate,
       status: this.status,
       category: this.category,
+      comments: this.comments,
     }
   }
 }

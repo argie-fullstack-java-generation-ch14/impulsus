@@ -11,7 +11,10 @@ class TaskManager {
   loadFromStorage() {
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return Array.isArray(stored) ? stored : [];
+      if (!Array.isArray(stored)) return [];
+      return stored.map((task) =>
+        Array.isArray(task?.comments) ? task : { ...task, comments: [] }
+      );
     } catch {
       return [];
     }
@@ -59,6 +62,57 @@ class TaskManager {
     this.taskList[task] = newTask;
     this.saveToStorage();
     this.notify();
+  }
+
+  addComment(taskId, text) {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    const comments = Array.isArray(task.comments) ? task.comments : [];
+    const author =
+      typeof user !== "undefined" && user
+        ? { name: user.name, src: user.src }
+        : { name: "Usuario", src: "" };
+
+    const comment = {
+      id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      author,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.updateTask(task.id, { ...task, comments: [...comments, comment] });
+    return comment;
+  }
+
+  updateComment(taskId, commentId, text) {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    const comments = Array.isArray(task.comments) ? task.comments : [];
+    let updatedComment = null;
+
+    const nextComments = comments.map((comment) => {
+      if (comment.id !== commentId) return comment;
+      updatedComment = { ...comment, text, updatedAt: new Date().toISOString() };
+      return updatedComment;
+    });
+
+    if (!updatedComment) return null;
+
+    this.updateTask(task.id, { ...task, comments: nextComments });
+    return updatedComment;
+  }
+
+  deleteComment(taskId, commentId) {
+    const task = this.getTaskById(taskId);
+    if (!task) return;
+
+    const comments = Array.isArray(task.comments) ? task.comments : [];
+    this.updateTask(task.id, {
+      ...task,
+      comments: comments.filter((comment) => comment.id !== commentId),
+    });
   }
 
   subscribe(listener) {
