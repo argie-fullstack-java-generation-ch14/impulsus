@@ -26,8 +26,19 @@ function taskCardTemplate(card) {
     status,
     category = null,
     tags = [],
-    comments = 0,
+    comments = [],
   } = card;
+
+  const commentsCount = Array.isArray(comments) ? comments.length : 0;
+  const commentsLabel = `${commentsCount} ${commentsCount === 1 ? "comentario" : "comentarios"}`;
+  const commentsCountHtml =
+    commentsCount > 0
+      ? `
+            <div class="card-comments-count">
+              <i class="fa-solid fa-comment"></i>
+              <span>${commentsLabel}</span>
+            </div>`
+      : "";
 
   const assigneeHtml = assignee
     ? `
@@ -87,7 +98,10 @@ function taskCardTemplate(card) {
         ${tagsRowTemplate(tags)}
         <div class="card-meta-row">
           ${statusChipTemplate({ status, label: statusLabels[status] })}
-          ${taskCategorySlotTemplate(category)}
+          <div class="card-meta-right">
+            ${commentsCountHtml}
+            ${taskCategorySlotTemplate(category)}
+          </div>
         </div>
         </div>
         </div>
