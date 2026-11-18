@@ -119,6 +119,19 @@
     `;
   }
 
+  function setCommentsPanelVisible(visible) {
+    const modalEl = getModalEl();
+    if (!modalEl) return;
+
+    const panel = modalEl.querySelector("#taskCommentsPanel");
+    const leftColumn = modalEl.querySelector(".create-task-card__left");
+    if (!panel || !leftColumn) return;
+
+    panel.classList.toggle("d-none", !visible);
+    leftColumn.classList.toggle("col-lg-7", visible);
+    leftColumn.classList.toggle("col-lg-12", !visible);
+  }
+
   function openEditTaskModal(task) {
     const modalEl = getModalEl();
     if (!modalEl || !task) return;
@@ -157,6 +170,11 @@
       }
     }
 
+    setCommentsPanelVisible(true);
+    if (typeof window.renderTaskComments === "function") {
+      window.renderTaskComments(task);
+    }
+
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
   }
 
@@ -180,6 +198,11 @@
 
     const column = addBtn.closest(".column-container");
     setStatus(column?.dataset.status || defaultStatus);
+
+    setCommentsPanelVisible(false);
+    if (typeof window.renderTaskComments === "function") {
+      window.renderTaskComments(null);
+    }
 
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
   });
@@ -229,7 +252,7 @@
         );
         if (existingTask) {
           updatedTask.tags = existingTask.tags || [];
-          updatedTask.comments = existingTask.comments || 0;
+          updatedTask.comments = Array.isArray(existingTask.comments) ? existingTask.comments : [];
         }
         taskManager.updateTask(editingTaskId, updatedTask);
 
@@ -305,6 +328,9 @@
       setStatus(defaultStatus);
       setCategory(defaultCategory);
       setAssignee(-1);
+      if (typeof window.renderTaskComments === "function") {
+        window.renderTaskComments(null);
+      }
       if (window.jQuery && jQuery.fn.datepicker && dueDateInput) {
         jQuery(dueDateInput).datepicker("update", "");
         jQuery(dueDateInput).datepicker("hide");

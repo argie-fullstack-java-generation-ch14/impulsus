@@ -1,0 +1,29 @@
+<div class="task-comments-panel d-flex flex-column flex-grow-1">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="fa-solid fa-comments text-dark fs-6"></i>
+      <h6 class="m-0 fw-bold text-dark">Comentarios</h6>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button type="button" class="create-task-card__header-btn d-none d-lg-inline-flex ms-1" data-bs-dismiss="modal"
+        aria-label="Cerrar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="task-comments__composer mb-4">
+    <textarea class="form-control task-comments__input" id="newCommentInput" rows="1"
+      placeholder="Escribe un comentario..."></textarea>
+    <div class="task-comments__composer-actions d-none mt-2 justify-content-end gap-2" id="commentComposerActions">
+      <button type="button" class="btn btn-sm create-task-form__btn--cancel py-1 px-2"
+        id="cancelCommentBtn">Cancelar</button>
+      <button type="button" class="btn btn-sm create-task-form__btn--create py-1 px-3"
+        id="saveCommentBtn">Guardar</button>
+    </div>
+  </div>
+
+  <div class="task-comments__list flex-grow-1 overflow-auto pe-1" id="taskCommentsList"></div>
+</div>
