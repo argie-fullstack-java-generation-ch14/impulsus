@@ -5,6 +5,8 @@
 
 **Impulsus** es un planificador de tareas minimalista desarrollado con JavaScript, HTML5 y CSS3. Este proyecto está profundamente inspirado en la filosofía de uno de mis libros favoritos, **"El Efecto Compuesto" (*The Compound Effect*) de Darren Hardy**, diseñado bajo la premisa de que las metas extraordinarias no se alcanzan con cambios drásticos de la noche a la mañana, sino mediante la acumulación constante y silenciosa de pequeñas acciones diarias.
 
+![Libro El Efecto Compuesto de Darren Hardy](./src/assets/img/compound-effect.png "Libro El Efecto Compuesto de Darren Hardy")
+
 ---
 
 ## 💡 Filosofía del Proyecto y Fuente de Inspiración
@@ -44,6 +46,8 @@ Bajo la premisa del *Efecto Compuesto*, cada pequeña decisión construye un res
 - 🎭 **Esparcimiento y Hobbies:** Talleres artísticos, actividades creativas y tiempo libre con propósito.
 - 🎁 **Deseos y Gustos:** Recompensas y compras no urgentes planificadas para disfrutar sin culpa.
 - ⚡ **Acción Transitoria:** Tareas puntuales, diligencias o imprevistos del día a día que se resuelven una vez y liberan espacio mental.
+
+![Categorías clave](./src/assets/img/categories.png "Categorías")
 
 ---
 
