@@ -85,6 +85,8 @@
 }
 
 .brand-icon {
+  width: 34px;
+  height: 34px;
   padding: 7px 6px;
   background-color: var(--primary-blue);
   border-radius: 8px;
