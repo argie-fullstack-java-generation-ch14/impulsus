@@ -39,7 +39,7 @@ A partir de esta idea, la experiencia y el diseño de **Impulsus** se sostienen 
 Bajo la premisa del *Efecto Compuesto*, cada pequeña decisión construye un resultado en un área específica de tu vida. **Impulsus** clasifica tus tareas en **8 categorías clave** para que identifiques de un vistazo en qué dimensión personal estás generando inercia y dónde estás invirtiendo tu energía diaria:
 
 - 🌱 **Hábitos y Mentalidad:** Rutinas ancla y entrenamiento mental diario que construyen disciplina a través de pequeñas acciones constantes.
-- 👔 **Maestría y Carrera:** Objetivos profesionales, estudio técnico profundo, bootcamps y desarrollo de habilidades clave.
+- 👔 **Propósito y Carrera:** Objetivos profesionales, estudio técnico profundo, bootcamps y desarrollo de habilidades clave.
 - 🏋️ **Vitalidad y Cuerpo:** Entrenamiento físico, ejercicio diario, deportes, artes marciales y cuidado activo de la salud corporal.
 - 🪧 **Hitos de Vida:** Metas trascendentales y de largo aliento que marcan un antes y un después personal.
 - 💰 **Necesidades e Inversión:** Gastos prioritarios, compras indispensables para el bienestar o herramientas que sostienen tu día a día.

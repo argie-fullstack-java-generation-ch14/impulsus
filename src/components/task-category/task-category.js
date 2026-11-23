@@ -5,8 +5,8 @@ const taskCategories = {
     description:
       "Rutinas ancla y entrenamiento mental diario que construyen disciplina a través de pequeñas acciones constantes.",
   },
-  "maestria-carrera": {
-    label: "Maestría y Carrera",
+  "proposito-carrera": {
+    label: "Propósito y Carrera",
     icon: "fa-solid fa-user-tie",
     description:
       "Objetivos profesionales, estudio técnico profundo, bootcamps y desarrollo de habilidades clave.",
