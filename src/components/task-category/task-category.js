@@ -7,7 +7,7 @@ const taskCategories = {
   },
   "proposito-carrera": {
     label: "Propósito y Carrera",
-    icon: "fa-solid fa-user-tie",
+    icon: "fa-solid fa-book-open-reader",
     description:
       "Objetivos profesionales, estudio técnico profundo, bootcamps y desarrollo de habilidades clave.",
   },
